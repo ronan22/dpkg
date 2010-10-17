@@ -1,6 +1,6 @@
 Name:           dpkg
 Version:        1.15.5.6
-Release:        4%{?dist}
+Release:        5%{?dist}
 Summary:        Package maintenance system for Debian Linux
 Group:          System Environment/Base
 # The entire source code is GPLv2+ with exception of the following
@@ -20,6 +20,7 @@ Patch1:         dpkg-change-libdir-path.patch
 # Fixes CVE-2010-0396 bugzilla #572522
 Patch2:		fedora-fix-CVE-2010-0396-00.patch
 Patch3:		fedora-fix-CVE-2010-0396-01.patch
+Patch4:     fedora-bug642160-empty-argv.patch
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires:  zlib-devel, bzip2-devel, libselinux-devel, gettext, ncurses-devel
 
@@ -63,6 +64,7 @@ dselect is a high-level interface for the installation/removal of debs .
 %patch1 -p1
 %patch2 -p1
 %patch3 -p1
+%patch4 -p1
 
 # Filter unwanted Requires:
 cat << \EOF > %{name}-req
@@ -201,6 +203,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Sun Oct 17 2010 Jeroen van Meeuwen <kanarip@kanarip.com> - 1.15.5.6-5
+- Apply minimal fix for rhbz #642160
+
 * Thu Mar 11 2010 Andrew Colin Kissa <andrew@topdog.za.net> - 1.15.5.6-4
 - Fix CVE-2010-0396
 
