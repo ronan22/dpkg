@@ -44,7 +44,6 @@ Summary:  Debian package development tools
 Group:    Development/System
 Requires: %{name} = %{version}-%{release}
 Requires: perl, patch, make, binutils, bzip2, lzma
-BuildArch: noarch
 
 %description devel
 This package provides the development tools (including dpkg-source).
