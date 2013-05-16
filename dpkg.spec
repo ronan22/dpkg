@@ -1,6 +1,6 @@
 Name:           dpkg
-Version:        1.15.5.6
-Release:        10%{?dist}
+Version:        1.16.10
+Release:        1%{?dist}
 Summary:        Package maintenance system for Debian Linux
 Group:          System Environment/Base
 # The entire source code is GPLv2+ with exception of the following
@@ -11,19 +11,17 @@ Group:          System Environment/Base
 # lib/compat/obstack.h, lib/compat/gettext.h,lib/compat/obstack.c - LGPLv2+
 License:        GPLv2 and GPLv2+ and LGPLv2+ and Public Domain and BSD
 URL:            http://packages.debian.org/unstable/admin/dpkg
-Source0:        http://ftp.debian.org/debian/pool/main/d/dpkg/%{name}_%{version}.tar.bz2
-# obtained from dpkg-source -x dpkg_1.15.5.6.dsc
-Source1:        dpkg.archtable
-# Fedora specific patch to store files under /usr/share/dpkg, not these are not binary
-# libs. and set user search path to /usr/local/share/dpkg
-Patch1:         dpkg-change-libdir-path.patch
-# Fixes CVE-2010-0396 bugzilla #572522
-Patch2:		fedora-fix-CVE-2010-0396-00.patch
-Patch3:		fedora-fix-CVE-2010-0396-01.patch
-Patch4:     fedora-bug642160-empty-argv.patch
-Patch5:		fedora-fix-CVE-2010-1679_CVE-2011-0402.patch
+Source0:        http://ftp.debian.org/debian/pool/main/d/dpkg/%{name}_%{version}.tar.xz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-BuildRequires:  zlib-devel, bzip2-devel, libselinux-devel, gettext, ncurses-devel
+BuildRequires:  zlib-devel bzip2-devel libselinux-devel gettext ncurses-devel
+BuildRequires:  autoconf automake gettext-devel
+BuildRequires:  doxygen flex xz-devel po4a dotconf-devel
+# for /usr/bin/pod2man
+%if 0%{?fedora} > 18
+BuildRequires: perl-podlators
+%else 
+BuildRequires: perl
+%endif
 
 %description 
 
@@ -40,16 +38,55 @@ dpkg and dselect will certainly be non-functional on a rpm-based system
 because packages dependencies will likely be unmet.
 
 %package devel
-Summary:  Debian package development tools
+Summary: Debian package management static library
 Group:    Development/System
-Requires: %{name} = %{version}-%{release}
-Requires: perl, patch, make, binutils, bzip2, lzma
-BuildArch: noarch
 
 %description devel
+This package provides the header files and static library necessary to
+develop software using dpkg, the same library used internally by dpkg.
+
+Note though, that the API is to be considered volatile, and might change
+at any time, use at your own risk.
+
+
+%package -n dpkg-dev
+Summary:  Debian package development tools
+Group:    Development/System
+Requires: dpkg-perl = %{version}-%{release}
+Requires: patch, make, binutils, bzip2, lzma, xz
+BuildArch: noarch
+
+%description -n dpkg-dev
 This package provides the development tools (including dpkg-source).
 Required to unpack, build and upload Debian source packages
 
+%package perl
+Summary: Dpkg perl modules
+Group:   System Environment/Base
+Requires: %{name} = %{version}-%{release}
+Requires: perl, perl-TimeDate
+BuildArch: noarch
+
+%description perl
+This package provides the perl modules used by the scripts
+in dpkg-dev. They cover a wide range of functionalities. Among them
+there are the following modules:
+  - Dpkg::Arch: manipulate Debian architecture information
+  - Dpkg::BuildOptions: parse and manipulate DEB_BUILD_OPTIONS
+  - Dpkg::Changelog: parse Debian changelogs
+  - Dpkg::Checksums: generate and parse checksums
+  - Dpkg::Compression::Process: wrapper around compression tools
+  - Dpkg::Compression::FileHandle: transparently (de)compress files
+  - Dpkg::Control: parse and manipulate Debian control information
+    (.dsc, .changes, Packages/Sources entries, etc.)
+  - Dpkg::Deps: parse and manipulate dependencies
+  - Dpkg::ErrorHandling: common error functions
+  - Dpkg::Index: collections of Dpkg::Control (Packages/Sources files for
+    example)
+  - Dpkg::IPC: spawn sub-processes and feed/retrieve data
+  - Dpkg::Substvars: substitute variables in strings
+  - Dpkg::Vendor: identify current distribution vendor
+  - Dpkg::Version: parse and manipulate Debian package versions
 
 %package -n dselect
 Summary:  Debian package management front-end
@@ -62,12 +99,6 @@ dselect is a high-level interface for the installation/removal of debs .
 %prep
 %setup -q
 
-%patch1 -p1
-%patch2 -p1
-%patch3 -p1
-%patch4 -p1
-%patch5 -p1
-
 # Filter unwanted Requires:
 cat << \EOF > %{name}-req
 #!/bin/sh
@@ -79,39 +110,43 @@ EOF
 chmod +x %{__perl_requires}
 
 %build
-%configure --without-start-stop-daemon \
+autoreconf -fiv
+%configure --disable-start-stop-daemon \
         --disable-linker-optimisations \
         --with-admindir=%{_localstatedir}/lib/dpkg \
-        --libdir=%{_datadir} \
         --with-selinux \
         --with-zlib \
-        --with-bz2 \
-        --disable-silent-rules
+        --with-bz2
 
 make %{?_smp_mflags}
 
 
 %install
-rm -rf $RPM_BUILD_ROOT
 make install DESTDIR=$RPM_BUILD_ROOT
-install -pm0644 %SOURCE1 $RPM_BUILD_ROOT/%{_datadir}/dpkg/archtable
+
+# from debian/dpkg.install
+install -pm0644 debian/archtable $RPM_BUILD_ROOT/%{_datadir}/dpkg/archtable
+install -pm0644 debian/dpkg.cfg $RPM_BUILD_ROOT/%{_sysconfdir}/dpkg.cfg
 
 %find_lang dpkg
 %find_lang dpkg-dev
 %find_lang dselect
 
 # fedora has its own implementation
-rm -rf $RPM_BUILD_ROOT%{_bindir}/update-alternatives
+rm $RPM_BUILD_ROOT%{_bindir}/update-alternatives
+rm $RPM_BUILD_ROOT%{_mandir}/man8/update-alternatives.8
+rm -rf $RPM_BUILD_ROOT%{_mandir}/*/man8/update-alternatives.8
 rm -rf $RPM_BUILD_ROOT%{_sysconfdir}/alternatives/
 
-%clean
-rm -rf $RPM_BUILD_ROOT
-
+#fedora has own implemenation
+#FIXME should we remove this ? 
+rm -rf $RPM_BUILD_ROOT%{_sbindir}/install-info
 
 %files   -f dpkg.lang
 %defattr(-,root,root,-)
 %doc debian/changelog README AUTHORS COPYING THANKS TODO
 %dir %{_sysconfdir}/dpkg
+%config(noreplace) %{_sysconfdir}/dpkg.cfg
 %{_bindir}/dpkg
 %{_bindir}/dpkg-deb
 %{_bindir}/dpkg-query
@@ -119,9 +154,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/dpkg-trigger
 %{_bindir}/dpkg-divert
 %{_bindir}/dpkg-statoverride
-%{_sbindir}/*
+%{_bindir}/dpkg-buildflags
+%{_bindir}/dpkg-maintscript-helper
+%{_bindir}/dpkg-mergechangelogs
 %dir %{_datadir}/dpkg
-%{_datadir}/dpkg/mksplit
 %{_datadir}/dpkg/archtable
 %{_datadir}/dpkg/cputable
 %{_datadir}/dpkg/ostable
@@ -129,20 +165,64 @@ rm -rf $RPM_BUILD_ROOT
 %{perl_vendorlib}/Dpkg.pm
 %dir %{perl_vendorlib}/Dpkg
 %{perl_vendorlib}/Dpkg/Gettext.pm
+%{_mandir}/man1/dpkg.1.gz
+%{_mandir}/man1/dpkg-architecture.1.gz
+%{_mandir}/man1/dpkg-buildflags.1.gz
+%{_mandir}/man1/dpkg-buildpackage.1.gz
+%{_mandir}/man1/dpkg-checkbuilddeps.1.gz
 %{_mandir}/man1/dpkg-deb.1.gz
+%{_mandir}/man1/dpkg-distaddfile.1.gz
+%{_mandir}/man1/dpkg-genchanges.1.gz
+%{_mandir}/man1/dpkg-gencontrol.1.gz
+%{_mandir}/man1/dpkg-gensymbols.1.gz
+%{_mandir}/man1/dpkg-maintscript-helper.1.gz
+%{_mandir}/man1/dpkg-mergechangelogs.1.gz
+%{_mandir}/man1/dpkg-name.1.gz
+%{_mandir}/man1/dpkg-parsechangelog.1.gz
 %{_mandir}/man1/dpkg-query.1.gz
+%{_mandir}/man1/dpkg-scanpackages.1.gz
+%{_mandir}/man1/dpkg-scansources.1.gz
+%{_mandir}/man1/dpkg-shlibdeps.1.gz
+%{_mandir}/man1/dpkg-source.1.gz
 %{_mandir}/man1/dpkg-split.1.gz
 %{_mandir}/man1/dpkg-trigger.1.gz
-%{_mandir}/man1/dpkg.1.gz
+%{_mandir}/man1/dpkg-vendor.1.gz
 %{_mandir}/man5/dpkg.cfg.5.gz
 %{_mandir}/man8/dpkg-divert.8.gz
 %{_mandir}/man8/dpkg-statoverride.8.gz
-#fedora has own implemenation
-%exclude %{_sbindir}/install-info
-#fedora has own implemenation
-%exclude %{_mandir}/man8/update-alternatives.8.gz
+%{_mandir}/*/man1/dpkg.1.gz
+%{_mandir}/*/man1/dpkg-architecture.1.gz
+%{_mandir}/*/man1/dpkg-buildflags.1.gz
+%{_mandir}/*/man1/dpkg-buildpackage.1.gz
+%{_mandir}/*/man1/dpkg-checkbuilddeps.1.gz
+%{_mandir}/*/man1/dpkg-deb.1.gz
+%{_mandir}/*/man1/dpkg-distaddfile.1.gz
+%{_mandir}/*/man1/dpkg-genchanges.1.gz
+%{_mandir}/*/man1/dpkg-gencontrol.1.gz
+%{_mandir}/*/man1/dpkg-gensymbols.1.gz
+%{_mandir}/*/man1/dpkg-maintscript-helper.1.gz
+%{_mandir}/*/man1/dpkg-mergechangelogs.1.gz
+%{_mandir}/*/man1/dpkg-name.1.gz
+%{_mandir}/*/man1/dpkg-parsechangelog.1.gz
+%{_mandir}/*/man1/dpkg-query.1.gz
+%{_mandir}/*/man1/dpkg-scanpackages.1.gz
+%{_mandir}/*/man1/dpkg-scansources.1.gz
+%{_mandir}/*/man1/dpkg-shlibdeps.1.gz
+%{_mandir}/*/man1/dpkg-source.1.gz
+%{_mandir}/*/man1/dpkg-split.1.gz
+%{_mandir}/*/man1/dpkg-trigger.1.gz
+%{_mandir}/*/man1/dpkg-vendor.1.gz
+%{_mandir}/*/man5/dpkg.cfg.5.gz
+%{_mandir}/*/man8/dpkg-divert.8.gz
+%{_mandir}/*/man8/dpkg-statoverride.8.gz
 
-%files  devel -f dpkg-dev.lang
+%files devel
+%defattr(-,root,root,-)
+%{_libdir}/libdpkg.a
+%{_libdir}/pkgconfig/libdpkg.pc
+%{_includedir}/dpkg/*.h
+
+%files -n dpkg-dev -f dpkg-dev.lang
 %defattr(-,root,root,-)
 %doc doc/README.api
 %{_bindir}/dpkg-architecture
@@ -159,15 +239,13 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/dpkg-shlibdeps
 %{_bindir}/dpkg-source
 %{_bindir}/dpkg-vendor
-%dir %{_datadir}/dpkg/parsechangelog
-%{_datadir}/dpkg/parsechangelog/*
-%exclude %{perl_vendorlib}/Dpkg/Gettext.pm
-%{perl_vendorlib}/Dpkg/*.pm
-%{perl_vendorlib}/Dpkg/Changelog
-%{perl_vendorlib}/Dpkg/Shlibs
-%{perl_vendorlib}/Dpkg/Source
-%{perl_vendorlib}/Dpkg/Vendor
-%{perl_vendorlib}/Dpkg/Control
+# FIXME: what are these?
+%{_datadir}/dpkg/abitable
+%{_datadir}/dpkg/architecture.mk
+%{_datadir}/dpkg/buildflags.mk
+%{_datadir}/dpkg/default.mk
+%{_datadir}/dpkg/pkg-info.mk
+%{_datadir}/dpkg/vendor.mk
 %{_mandir}/man1/dpkg-architecture.1.gz
 %{_mandir}/man1/dpkg-buildpackage.1.gz
 %{_mandir}/man1/dpkg-checkbuilddeps.1.gz
@@ -183,15 +261,93 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man1/dpkg-source.1.gz
 %{_mandir}/man1/dpkg-vendor.1.gz
 %{_mandir}/man5/deb-control.5.gz
-%{_mandir}/man5/deb-old.5.gz
-%{_mandir}/man5/deb-override.5.gz
 %{_mandir}/man5/deb-extra-override.5.gz
+%{_mandir}/man5/deb-old.5.gz
+%{_mandir}/man5/deb-origin.5.gz
+%{_mandir}/man5/deb-override.5.gz
 %{_mandir}/man5/deb-shlibs.5.gz
+%{_mandir}/man5/deb-split.5.gz
+%{_mandir}/man5/deb-src-control.5.gz
 %{_mandir}/man5/deb-substvars.5.gz
 %{_mandir}/man5/deb-symbols.5.gz
 %{_mandir}/man5/deb-triggers.5.gz
 %{_mandir}/man5/deb-version.5.gz
 %{_mandir}/man5/deb.5.gz
+%{_mandir}/*/man1/dpkg-architecture.1.gz
+%{_mandir}/*/man1/dpkg-buildpackage.1.gz
+%{_mandir}/*/man1/dpkg-checkbuilddeps.1.gz
+%{_mandir}/*/man1/dpkg-distaddfile.1.gz
+%{_mandir}/*/man1/dpkg-genchanges.1.gz
+%{_mandir}/*/man1/dpkg-gencontrol.1.gz
+%{_mandir}/*/man1/dpkg-gensymbols.1.gz
+%{_mandir}/*/man1/dpkg-name.1.gz
+%{_mandir}/*/man1/dpkg-parsechangelog.1.gz
+%{_mandir}/*/man1/dpkg-scanpackages.1.gz
+%{_mandir}/*/man1/dpkg-scansources.1.gz
+%{_mandir}/*/man1/dpkg-shlibdeps.1.gz
+%{_mandir}/*/man1/dpkg-source.1.gz
+%{_mandir}/*/man1/dpkg-vendor.1.gz
+%{_mandir}/*/man5/deb-control.5.gz
+%{_mandir}/*/man5/deb-extra-override.5.gz
+%{_mandir}/*/man5/deb-old.5.gz
+%{_mandir}/*/man5/deb-origin.5.gz
+%{_mandir}/*/man5/deb-override.5.gz
+%{_mandir}/*/man5/deb-shlibs.5.gz
+%{_mandir}/*/man5/deb-split.5.gz
+%{_mandir}/*/man5/deb-src-control.5.gz
+%{_mandir}/*/man5/deb-substvars.5.gz
+%{_mandir}/*/man5/deb-symbols.5.gz
+%{_mandir}/*/man5/deb-triggers.5.gz
+%{_mandir}/*/man5/deb-version.5.gz
+%{_mandir}/*/man5/deb.5.gz
+
+%files perl
+%defattr(-,root,root,-)
+%dir %{_libdir}/dpkg/parsechangelog
+%{_libdir}/dpkg/parsechangelog/*
+
+#FIXME other imbarecing exclude why we should exclude this one ?
+#exclude %{perl_vendorlib}/Dpkg/Gettext.pm
+%{perl_vendorlib}/Dpkg/*.pm
+%{perl_vendorlib}/Dpkg/Changelog
+%{perl_vendorlib}/Dpkg/Shlibs
+%{perl_vendorlib}/Dpkg/Source
+%{perl_vendorlib}/Dpkg/Vendor
+%{perl_vendorlib}/Dpkg/Control
+%{perl_vendorlib}/Dpkg/Compression/*.pm
+%{perl_vendorlib}/Dpkg/Interface/*.pm
+
+%{_mandir}/man3/Dpkg::BuildEnv.3.gz
+%{_mandir}/man3/Dpkg::BuildFlags.3.gz
+%{_mandir}/man3/Dpkg::BuildOptions.3.gz
+%{_mandir}/man3/Dpkg::Changelog.3.gz
+%{_mandir}/man3/Dpkg::Changelog::Debian.3.gz
+%{_mandir}/man3/Dpkg::Changelog::Entry.3.gz
+%{_mandir}/man3/Dpkg::Changelog::Entry::Debian.3.gz
+%{_mandir}/man3/Dpkg::Changelog::Parse.3.gz
+%{_mandir}/man3/Dpkg::Checksums.3.gz
+%{_mandir}/man3/Dpkg::Compression.3.gz
+%{_mandir}/man3/Dpkg::Compression::FileHandle.3.gz
+%{_mandir}/man3/Dpkg::Compression::Process.3.gz
+%{_mandir}/man3/Dpkg::Conf.3.gz
+%{_mandir}/man3/Dpkg::Control.3.gz
+%{_mandir}/man3/Dpkg::Control::Changelog.3.gz
+%{_mandir}/man3/Dpkg::Control::Fields.3.gz
+%{_mandir}/man3/Dpkg::Control::Hash.3.gz
+%{_mandir}/man3/Dpkg::Control::Info.3.gz
+%{_mandir}/man3/Dpkg::Control::Types.3.gz
+%{_mandir}/man3/Dpkg::Deps.3.gz
+%{_mandir}/man3/Dpkg::IPC.3.gz
+%{_mandir}/man3/Dpkg::Index.3.gz
+%{_mandir}/man3/Dpkg::Interface::Storable.3.gz
+%{_mandir}/man3/Dpkg::Path.3.gz
+%{_mandir}/man3/Dpkg::Source::Package.3.gz
+%{_mandir}/man3/Dpkg::Substvars.3.gz
+%{_mandir}/man3/Dpkg::Vendor.3.gz
+%{_mandir}/man3/Dpkg::Vendor::Debian.3.gz
+%{_mandir}/man3/Dpkg::Vendor::Default.3.gz
+%{_mandir}/man3/Dpkg::Vendor::Ubuntu.3.gz
+%{_mandir}/man3/Dpkg::Version.3.gz
 
 
 %files -n dselect -f dselect.lang
@@ -199,12 +355,33 @@ rm -rf $RPM_BUILD_ROOT
 %doc dselect/methods/multicd/README.multicd dselect/methods/ftp/README.mirrors.txt
 %{_bindir}/dselect
 %{perl_vendorlib}/Debian
-%{_datadir}/dpkg/methods
-%{_mandir}/man*/dselect*.gz
+%{_libdir}/dpkg/methods
+%{_mandir}/man1/dselect.1.gz
+%{_mandir}/*/man1/dselect.1.gz
+%{_mandir}/man5/dselect.cfg.5.gz
+%{_mandir}/*/man5/dselect.cfg.5.gz
 
 
 
 %changelog
+* Thu May 16 2013 Sérgio Basto <sergio@serjux.com> - 1.16.10-1
+- Add BR perl-podlators for pod2man in F19 development or just BR perl
+- Add some other importants BR: doxygen flex xz-devel po4a dotconf-devel
+- Fix packages names which are debianized, so packages will be: dpkg-perl
+and dpkg-dev (and dpkg-devel for headers of dpkg).
+- Some clean ups.
+
+* Sat May  4 2013 Oron Peled <oron@actcom.co.il>
+- Bump version to Debian/wheezy
+- Call autoreconf: make sure we don't reuse Debian packaged
+  stuff (config.guess, etc.)
+- CVE patches not needed -- is already fixed upstream
+- Removed dpkg-change-libdir.patch:
+  - Patching Makefile.in is wrong (can patch Makefile.am with autoreconf)
+  - Less patch churn for non-critical paths
+  - Accept /usr/lib/dpkg/parsechangelog
+  - Accept /usr/lib/dpkg/methods
+
 * Wed Feb 13 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.15.5.6-10
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_19_Mass_Rebuild
 
