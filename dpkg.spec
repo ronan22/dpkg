@@ -54,7 +54,6 @@ Summary:  Debian package development tools
 Group:    Development/System
 Requires: dpkg-perl = %{version}-%{release}
 Requires: patch, make, binutils, bzip2, lzma, xz
-BuildArch: noarch
 
 %description -n dpkg-dev
 This package provides the development tools (including dpkg-source).
@@ -370,6 +369,7 @@ rm -rf $RPM_BUILD_ROOT%{_sbindir}/install-info
 - Fix packages names which are debianized, so packages will be: dpkg-perl
 and dpkg-dev (and dpkg-devel for headers of dpkg).
 - Some clean ups.
+- dpkg-perl must be arched.
 
 * Sat May  4 2013 Oron Peled <oron@actcom.co.il>
 - Bump version to Debian/wheezy
