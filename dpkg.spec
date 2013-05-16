@@ -54,6 +54,7 @@ Summary:  Debian package development tools
 Group:    Development/System
 Requires: dpkg-perl = %{version}-%{release}
 Requires: patch, make, binutils, bzip2, lzma, xz
+BuildArch: noarch
 
 %description -n dpkg-dev
 This package provides the development tools (including dpkg-source).
@@ -64,7 +65,6 @@ Summary: Dpkg perl modules
 Group:   System Environment/Base
 Requires: %{name} = %{version}-%{release}
 Requires: perl, perl-TimeDate
-BuildArch: noarch
 
 %description perl
 This package provides the perl modules used by the scripts
