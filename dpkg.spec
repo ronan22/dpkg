@@ -1,6 +1,6 @@
 Name:           dpkg
 Version:        1.16.10
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Package maintenance system for Debian Linux
 Group:          System Environment/Base
 # The entire source code is GPLv2+ with exception of the following
@@ -12,6 +12,7 @@ Group:          System Environment/Base
 License:        GPLv2 and GPLv2+ and LGPLv2+ and Public Domain and BSD
 URL:            http://packages.debian.org/unstable/admin/dpkg
 Source0:        http://ftp.debian.org/debian/pool/main/d/dpkg/%{name}_%{version}.tar.xz
+Patch0:         dpkg-perl-libexecdir.patch
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires:  zlib-devel bzip2-devel libselinux-devel gettext ncurses-devel
 BuildRequires:  autoconf automake gettext-devel
@@ -65,6 +66,7 @@ Summary: Dpkg perl modules
 Group:   System Environment/Base
 Requires: %{name} = %{version}-%{release}
 Requires: perl, perl-TimeDate
+BuildArch: noarch
 
 %description perl
 This package provides the perl modules used by the scripts
@@ -97,6 +99,7 @@ dselect is a high-level interface for the installation/removal of debs .
 
 %prep
 %setup -q
+%patch0 -p1
 
 # Filter unwanted Requires:
 cat << \EOF > %{name}-req
@@ -302,8 +305,8 @@ rm -rf $RPM_BUILD_ROOT%{_sbindir}/install-info
 
 %files perl
 %defattr(-,root,root,-)
-%dir %{_libdir}/dpkg/parsechangelog
-%{_libdir}/dpkg/parsechangelog/*
+%dir %{_libexecdir}/dpkg/parsechangelog
+%{_libexecdir}/dpkg/parsechangelog/*
 
 #FIXME other imbarecing exclude why we should exclude this one ?
 #exclude %{perl_vendorlib}/Dpkg/Gettext.pm
@@ -363,6 +366,9 @@ rm -rf $RPM_BUILD_ROOT%{_sbindir}/install-info
 
 
 %changelog
+* Fri May 17 2013 Sérgio Basto <sergio@serjux.com> - 1.16.10-2
+- apply fix by Oron Peled bug #648384
+
 * Thu May 16 2013 Sérgio Basto <sergio@serjux.com> - 1.16.10-1
 - Add BR perl-podlators for pod2man in F19 development or just BR perl
 - Add some other importants BR: doxygen flex xz-devel po4a dotconf-devel
