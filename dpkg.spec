@@ -1,6 +1,6 @@
 Name:           dpkg
 Version:        1.16.10
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        Package maintenance system for Debian Linux
 Group:          System Environment/Base
 # The entire source code is GPLv2+ with exception of the following
@@ -13,7 +13,6 @@ License:        GPLv2 and GPLv2+ and LGPLv2+ and Public Domain and BSD
 URL:            http://packages.debian.org/unstable/admin/dpkg
 Source0:        http://ftp.debian.org/debian/pool/main/d/dpkg/%{name}_%{version}.tar.xz
 Patch0:         dpkg-perl-libexecdir.patch
-BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires:  zlib-devel bzip2-devel libselinux-devel gettext ncurses-devel
 BuildRequires:  autoconf automake gettext-devel
 BuildRequires:  doxygen flex xz-devel po4a dotconf-devel
@@ -64,7 +63,6 @@ Required to unpack, build and upload Debian source packages
 %package perl
 Summary: Dpkg perl modules
 Group:   System Environment/Base
-Requires: %{name} = %{version}-%{release}
 Requires: perl, perl-TimeDate
 BuildArch: noarch
 
@@ -144,10 +142,42 @@ rm -rf $RPM_BUILD_ROOT%{_sysconfdir}/alternatives/
 #FIXME should we remove this ? 
 rm -rf $RPM_BUILD_ROOT%{_sbindir}/install-info
 
+mkdir -p %{buildroot}/var/lib/dpkg/alternatives %{buildroot}/var/lib/dpkg/info \
+ %{buildroot}/var/lib/dpkg/parts %{buildroot}/var/lib/dpkg/updates \
+ %{buildroot}/var/lib/dpkg/methods
+
+mkdir -p %{buildroot}/%{_sysconfdir}/dpkg/dpkg.cfg.d %{buildroot}/%{_sysconfdir}/dpkg/dselect.cfg.d
+
+
+%post
+# from dpkg.postinst
+# Create the database files if they don't already exist
+create_database() {
+    admindir=${DPKG_ADMINDIR:-/var/lib/dpkg}
+
+    for file in diversions statoverride status; do
+    if [ ! -f "$admindir/$file" ]; then
+        touch "$admindir/$file"
+    fi
+    done
+}
+
+# Create log file and set default permissions if possible
+create_logfile() {
+    logfile=/var/log/dpkg.log
+    touch $logfile
+    chmod 644 $logfile
+    chown root:root $logfile 2>/dev/null || chown 0:0 $logfile
+}
+create_database
+create_logfile
+
+
 %files   -f dpkg.lang
 %defattr(-,root,root,-)
 %doc debian/changelog README AUTHORS COPYING THANKS TODO
 %dir %{_sysconfdir}/dpkg
+%dir %{_sysconfdir}/dpkg/dpkg.cfg.d
 %config(noreplace) %{_sysconfdir}/dpkg.cfg
 %{_bindir}/dpkg
 %{_bindir}/dpkg-deb
@@ -164,9 +194,10 @@ rm -rf $RPM_BUILD_ROOT%{_sbindir}/install-info
 %{_datadir}/dpkg/cputable
 %{_datadir}/dpkg/ostable
 %{_datadir}/dpkg/triplettable
-%{perl_vendorlib}/Dpkg.pm
-%dir %{perl_vendorlib}/Dpkg
-%{perl_vendorlib}/Dpkg/Gettext.pm
+%dir /var/lib/dpkg/alternatives
+%dir /var/lib/dpkg/info
+%dir /var/lib/dpkg/parts
+%dir /var/lib/dpkg/updates
 %{_mandir}/man1/dpkg.1.gz
 %{_mandir}/man1/dpkg-architecture.1.gz
 %{_mandir}/man1/dpkg-buildflags.1.gz
@@ -308,8 +339,8 @@ rm -rf $RPM_BUILD_ROOT%{_sbindir}/install-info
 %dir %{_libexecdir}/dpkg/parsechangelog
 %{_libexecdir}/dpkg/parsechangelog/*
 
-#FIXME other imbarecing exclude why we should exclude this one ?
-#exclude %{perl_vendorlib}/Dpkg/Gettext.pm
+%dir %{perl_vendorlib}/Dpkg
+%{perl_vendorlib}/Dpkg.pm
 %{perl_vendorlib}/Dpkg/*.pm
 %{perl_vendorlib}/Dpkg/Changelog
 %{perl_vendorlib}/Dpkg/Shlibs
@@ -362,12 +393,21 @@ rm -rf $RPM_BUILD_ROOT%{_sbindir}/install-info
 %{_mandir}/*/man1/dselect.1.gz
 %{_mandir}/man5/dselect.cfg.5.gz
 %{_mandir}/*/man5/dselect.cfg.5.gz
-
+%dir %{_sysconfdir}/dpkg/dselect.cfg.d
+/var/lib/dpkg/methods
 
 
 %changelog
+* Tue May 21 2013 Sérgio Basto <sergio@serjux.com> - 1.16.10-3
+- Copied from dpkg-1.16.10/debian/dpkg.postinst, on post install, runs create_database, create_logfile. 
+- Based on dpkg.install and dselect.install
+  created some missing directories in /var/lib/dpkg and in /etc/dpkg .
+- Drop Requirement dpkg of dpkg-perl.
+- Fix a FIXME , all perls moved to dpkg-perl.
+- TODO: set logrotates, see debian/dpkg.logrotate.
+
 * Fri May 17 2013 Sérgio Basto <sergio@serjux.com> - 1.16.10-2
-- apply fix by Oron Peled bug #648384
+- apply fix by Oron Peled bug #648384, adds dpkg-perl as noarch
 
 * Thu May 16 2013 Sérgio Basto <sergio@serjux.com> - 1.16.10-1
 - Add BR perl-podlators for pod2man in F19 development or just BR perl
