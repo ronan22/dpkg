@@ -1,6 +1,6 @@
 Name:           dpkg
 Version:        1.16.10
-Release:        3%{?dist}
+Release:        4%{?dist}
 Summary:        Package maintenance system for Debian Linux
 Group:          System Environment/Base
 # The entire source code is GPLv2+ with exception of the following
@@ -40,6 +40,7 @@ because packages dependencies will likely be unmet.
 %package devel
 Summary: Debian package management static library
 Group:    Development/System
+Provides: dpkg-static = %{version}-%{release}
 
 %description devel
 This package provides the header files and static library necessary to
@@ -398,6 +399,9 @@ create_logfile
 
 
 %changelog
+* Sun Jun 02 2013 Sérgio Basto <sergio@serjux.com> - 1.16.10-4
+- provided virtual -static package rhbz #967215
+
 * Tue May 21 2013 Sérgio Basto <sergio@serjux.com> - 1.16.10-3
 - Copied from dpkg-1.16.10/debian/dpkg.postinst, on post install, runs create_database, create_logfile. 
 - Based on dpkg.install and dselect.install
