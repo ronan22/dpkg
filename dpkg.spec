@@ -50,14 +50,14 @@ Note though, that the API is to be considered volatile, and might change
 at any time, use at your own risk.
 
 
-%package -n dpkg-dev
+%package dev
 Summary:  Debian package development tools
 Group:    Development/System
 Requires: dpkg-perl = %{version}-%{release}
 Requires: patch, make, binutils, bzip2, lzma, xz
 BuildArch: noarch
 
-%description -n dpkg-dev
+%description dev
 This package provides the development tools (including dpkg-source).
 Required to unpack, build and upload Debian source packages
 
@@ -182,14 +182,12 @@ create_logfile
 %config(noreplace) %{_sysconfdir}/dpkg.cfg
 %{_bindir}/dpkg
 %{_bindir}/dpkg-deb
+%{_bindir}/dpkg-maintscript-helper
 %{_bindir}/dpkg-query
 %{_bindir}/dpkg-split
 %{_bindir}/dpkg-trigger
 %{_bindir}/dpkg-divert
 %{_bindir}/dpkg-statoverride
-%{_bindir}/dpkg-buildflags
-%{_bindir}/dpkg-maintscript-helper
-%{_bindir}/dpkg-mergechangelogs
 %dir %{_datadir}/dpkg
 %{_datadir}/dpkg/archtable
 %{_datadir}/dpkg/cputable
@@ -200,52 +198,20 @@ create_logfile
 %dir /var/lib/dpkg/parts
 %dir /var/lib/dpkg/updates
 %{_mandir}/man1/dpkg.1.gz
-%{_mandir}/man1/dpkg-architecture.1.gz
-%{_mandir}/man1/dpkg-buildflags.1.gz
-%{_mandir}/man1/dpkg-buildpackage.1.gz
-%{_mandir}/man1/dpkg-checkbuilddeps.1.gz
 %{_mandir}/man1/dpkg-deb.1.gz
-%{_mandir}/man1/dpkg-distaddfile.1.gz
-%{_mandir}/man1/dpkg-genchanges.1.gz
-%{_mandir}/man1/dpkg-gencontrol.1.gz
-%{_mandir}/man1/dpkg-gensymbols.1.gz
 %{_mandir}/man1/dpkg-maintscript-helper.1.gz
-%{_mandir}/man1/dpkg-mergechangelogs.1.gz
-%{_mandir}/man1/dpkg-name.1.gz
-%{_mandir}/man1/dpkg-parsechangelog.1.gz
 %{_mandir}/man1/dpkg-query.1.gz
-%{_mandir}/man1/dpkg-scanpackages.1.gz
-%{_mandir}/man1/dpkg-scansources.1.gz
-%{_mandir}/man1/dpkg-shlibdeps.1.gz
-%{_mandir}/man1/dpkg-source.1.gz
 %{_mandir}/man1/dpkg-split.1.gz
 %{_mandir}/man1/dpkg-trigger.1.gz
-%{_mandir}/man1/dpkg-vendor.1.gz
 %{_mandir}/man5/dpkg.cfg.5.gz
 %{_mandir}/man8/dpkg-divert.8.gz
 %{_mandir}/man8/dpkg-statoverride.8.gz
 %{_mandir}/*/man1/dpkg.1.gz
-%{_mandir}/*/man1/dpkg-architecture.1.gz
-%{_mandir}/*/man1/dpkg-buildflags.1.gz
-%{_mandir}/*/man1/dpkg-buildpackage.1.gz
-%{_mandir}/*/man1/dpkg-checkbuilddeps.1.gz
 %{_mandir}/*/man1/dpkg-deb.1.gz
-%{_mandir}/*/man1/dpkg-distaddfile.1.gz
-%{_mandir}/*/man1/dpkg-genchanges.1.gz
-%{_mandir}/*/man1/dpkg-gencontrol.1.gz
-%{_mandir}/*/man1/dpkg-gensymbols.1.gz
 %{_mandir}/*/man1/dpkg-maintscript-helper.1.gz
-%{_mandir}/*/man1/dpkg-mergechangelogs.1.gz
-%{_mandir}/*/man1/dpkg-name.1.gz
-%{_mandir}/*/man1/dpkg-parsechangelog.1.gz
 %{_mandir}/*/man1/dpkg-query.1.gz
-%{_mandir}/*/man1/dpkg-scanpackages.1.gz
-%{_mandir}/*/man1/dpkg-scansources.1.gz
-%{_mandir}/*/man1/dpkg-shlibdeps.1.gz
-%{_mandir}/*/man1/dpkg-source.1.gz
 %{_mandir}/*/man1/dpkg-split.1.gz
 %{_mandir}/*/man1/dpkg-trigger.1.gz
-%{_mandir}/*/man1/dpkg-vendor.1.gz
 %{_mandir}/*/man5/dpkg.cfg.5.gz
 %{_mandir}/*/man8/dpkg-divert.8.gz
 %{_mandir}/*/man8/dpkg-statoverride.8.gz
@@ -256,16 +222,18 @@ create_logfile
 %{_libdir}/pkgconfig/libdpkg.pc
 %{_includedir}/dpkg/*.h
 
-%files -n dpkg-dev -f dpkg-dev.lang
+%files dev -f dpkg-dev.lang
 %defattr(-,root,root,-)
 %doc doc/README.api
 %{_bindir}/dpkg-architecture
 %{_bindir}/dpkg-buildpackage
+%{_bindir}/dpkg-buildflags
 %{_bindir}/dpkg-checkbuilddeps
 %{_bindir}/dpkg-distaddfile
 %{_bindir}/dpkg-genchanges
 %{_bindir}/dpkg-gencontrol
 %{_bindir}/dpkg-gensymbols
+%{_bindir}/dpkg-mergechangelogs
 %{_bindir}/dpkg-name
 %{_bindir}/dpkg-parsechangelog
 %{_bindir}/dpkg-scanpackages
@@ -281,12 +249,14 @@ create_logfile
 %{_datadir}/dpkg/pkg-info.mk
 %{_datadir}/dpkg/vendor.mk
 %{_mandir}/man1/dpkg-architecture.1.gz
+%{_mandir}/man1/dpkg-buildflags.1.gz
 %{_mandir}/man1/dpkg-buildpackage.1.gz
 %{_mandir}/man1/dpkg-checkbuilddeps.1.gz
 %{_mandir}/man1/dpkg-distaddfile.1.gz
 %{_mandir}/man1/dpkg-genchanges.1.gz
 %{_mandir}/man1/dpkg-gencontrol.1.gz
 %{_mandir}/man1/dpkg-gensymbols.1.gz
+%{_mandir}/man1/dpkg-mergechangelogs.1.gz
 %{_mandir}/man1/dpkg-name.1.gz
 %{_mandir}/man1/dpkg-parsechangelog.1.gz
 %{_mandir}/man1/dpkg-scanpackages.1.gz
@@ -309,11 +279,13 @@ create_logfile
 %{_mandir}/man5/deb.5.gz
 %{_mandir}/*/man1/dpkg-architecture.1.gz
 %{_mandir}/*/man1/dpkg-buildpackage.1.gz
+%{_mandir}/*/man1/dpkg-buildflags.1.gz
 %{_mandir}/*/man1/dpkg-checkbuilddeps.1.gz
 %{_mandir}/*/man1/dpkg-distaddfile.1.gz
 %{_mandir}/*/man1/dpkg-genchanges.1.gz
 %{_mandir}/*/man1/dpkg-gencontrol.1.gz
 %{_mandir}/*/man1/dpkg-gensymbols.1.gz
+%{_mandir}/*/man1/dpkg-mergechangelogs.1.gz
 %{_mandir}/*/man1/dpkg-name.1.gz
 %{_mandir}/*/man1/dpkg-parsechangelog.1.gz
 %{_mandir}/*/man1/dpkg-scanpackages.1.gz
@@ -399,6 +371,28 @@ create_logfile
 
 
 %changelog
+* Sat Jun 29 2013 Sérgio Basto <sergio@serjux.com>
+- move from dpkg to dpkg-dev, rhbz #979378 
+  - dpkg-mergechangelogs and its man-pages
+  - dpkg-buildflags and its man-pages
+- remove man pages dups, also rhbz #979378
+    dpkg-architecture.1.gz
+    dpkg-buildflags.1.gz
+    dpkg-buildpackage.1.gz
+    dpkg-checkbuilddeps.1.gz
+    dpkg-distaddfile.1.gz
+    dpkg-genchanges.1.gz
+    dpkg-gencontrol.1.gz
+    dpkg-gensymbols.1.gz
+    dpkg-mergechangelogs.1.gz
+    dpkg-name.1.gz
+    dpkg-parsechangelog.1.gz
+    dpkg-scanpackages.1.gz
+    dpkg-scansources.1.gz
+    dpkg-shlibdeps.1.gz
+    dpkg-source.1.gz
+    dpkg-vendor.1.gz
+
 * Sun Jun 02 2013 Sérgio Basto <sergio@serjux.com> - 1.16.10-4
 - provided virtual -static package rhbz #967215
 
