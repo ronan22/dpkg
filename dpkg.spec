@@ -1,6 +1,9 @@
+%global	pkgconfdir	%{_sysconfdir}/dpkg
+%global	pkgdatadir	%{_datadir}/dpkg
+
 Name:           dpkg
 Version:        1.16.10
-Release:        4%{?dist}
+Release:        5%{?dist}
 Summary:        Package maintenance system for Debian Linux
 Group:          System Environment/Base
 # The entire source code is GPLv2+ with exception of the following
@@ -55,6 +58,7 @@ Summary:  Debian package development tools
 Group:    Development/System
 Requires: dpkg-perl = %{version}-%{release}
 Requires: patch, make, binutils, bzip2, lzma, xz
+Obsoletes: dpkg-devel < 1.16
 BuildArch: noarch
 
 %description dev
@@ -64,6 +68,7 @@ Required to unpack, build and upload Debian source packages
 %package perl
 Summary: Dpkg perl modules
 Group:   System Environment/Base
+Requires: dpkg = %{version}-%{release}
 Requires: perl, perl-TimeDate
 BuildArch: noarch
 
@@ -125,9 +130,15 @@ make %{?_smp_mflags}
 %install
 make install DESTDIR=$RPM_BUILD_ROOT
 
+mkdir -p %{buildroot}/%{pkgconfdir}/dpkg.cfg.d
+mkdir -p %{buildroot}/%{pkgconfdir}/dselect.cfg.d
+
 # from debian/dpkg.install
-install -pm0644 debian/archtable $RPM_BUILD_ROOT/%{_datadir}/dpkg/archtable
-install -pm0644 debian/dpkg.cfg $RPM_BUILD_ROOT/%{_sysconfdir}/dpkg.cfg
+install -pm0644 debian/archtable $RPM_BUILD_ROOT/%{pkgdatadir}/archtable
+install -pm0644 debian/dpkg.cfg $RPM_BUILD_ROOT/%{pkgconfdir}
+install -pm0644 debian/shlibs.default $RPM_BUILD_ROOT/%{pkgconfdir}
+install -pm0644 debian/shlibs.override $RPM_BUILD_ROOT/%{pkgconfdir}
+
 
 %find_lang dpkg
 %find_lang dpkg-dev
@@ -146,8 +157,6 @@ rm -rf $RPM_BUILD_ROOT%{_sbindir}/install-info
 mkdir -p %{buildroot}/var/lib/dpkg/alternatives %{buildroot}/var/lib/dpkg/info \
  %{buildroot}/var/lib/dpkg/parts %{buildroot}/var/lib/dpkg/updates \
  %{buildroot}/var/lib/dpkg/methods
-
-mkdir -p %{buildroot}/%{_sysconfdir}/dpkg/dpkg.cfg.d %{buildroot}/%{_sysconfdir}/dpkg/dselect.cfg.d
 
 
 %post
@@ -177,9 +186,9 @@ create_logfile
 %files   -f dpkg.lang
 %defattr(-,root,root,-)
 %doc debian/changelog README AUTHORS COPYING THANKS TODO
-%dir %{_sysconfdir}/dpkg
-%dir %{_sysconfdir}/dpkg/dpkg.cfg.d
-%config(noreplace) %{_sysconfdir}/dpkg.cfg
+%dir %{pkgconfdir}
+%dir %{pkgconfdir}/dpkg.cfg.d
+%config(noreplace) %{pkgconfdir}/dpkg.cfg
 %{_bindir}/dpkg
 %{_bindir}/dpkg-deb
 %{_bindir}/dpkg-maintscript-helper
@@ -188,11 +197,12 @@ create_logfile
 %{_bindir}/dpkg-trigger
 %{_bindir}/dpkg-divert
 %{_bindir}/dpkg-statoverride
-%dir %{_datadir}/dpkg
-%{_datadir}/dpkg/archtable
-%{_datadir}/dpkg/cputable
-%{_datadir}/dpkg/ostable
-%{_datadir}/dpkg/triplettable
+%dir %{pkgdatadir}
+%{pkgdatadir}/abitable
+%{pkgdatadir}/archtable
+%{pkgdatadir}/cputable
+%{pkgdatadir}/ostable
+%{pkgdatadir}/triplettable
 %dir /var/lib/dpkg/alternatives
 %dir /var/lib/dpkg/info
 %dir /var/lib/dpkg/parts
@@ -222,9 +232,11 @@ create_logfile
 %{_libdir}/pkgconfig/libdpkg.pc
 %{_includedir}/dpkg/*.h
 
-%files dev -f dpkg-dev.lang
+%files dev
 %defattr(-,root,root,-)
 %doc doc/README.api
+%config(noreplace) %{pkgconfdir}/shlibs.default
+%config(noreplace) %{pkgconfdir}/shlibs.override
 %{_bindir}/dpkg-architecture
 %{_bindir}/dpkg-buildpackage
 %{_bindir}/dpkg-buildflags
@@ -241,13 +253,7 @@ create_logfile
 %{_bindir}/dpkg-shlibdeps
 %{_bindir}/dpkg-source
 %{_bindir}/dpkg-vendor
-# FIXME: what are these?
-%{_datadir}/dpkg/abitable
-%{_datadir}/dpkg/architecture.mk
-%{_datadir}/dpkg/buildflags.mk
-%{_datadir}/dpkg/default.mk
-%{_datadir}/dpkg/pkg-info.mk
-%{_datadir}/dpkg/vendor.mk
+%{pkgdatadir}/*.mk
 %{_mandir}/man1/dpkg-architecture.1.gz
 %{_mandir}/man1/dpkg-buildflags.1.gz
 %{_mandir}/man1/dpkg-buildpackage.1.gz
@@ -307,53 +313,12 @@ create_logfile
 %{_mandir}/*/man5/deb-version.5.gz
 %{_mandir}/*/man5/deb.5.gz
 
-%files perl
+%files perl -f dpkg-dev.lang
 %defattr(-,root,root,-)
-%dir %{_libexecdir}/dpkg/parsechangelog
-%{_libexecdir}/dpkg/parsechangelog/*
+%{_libexecdir}/dpkg/parsechangelog
 
-%dir %{perl_vendorlib}/Dpkg
-%{perl_vendorlib}/Dpkg.pm
-%{perl_vendorlib}/Dpkg/*.pm
-%{perl_vendorlib}/Dpkg/Changelog
-%{perl_vendorlib}/Dpkg/Shlibs
-%{perl_vendorlib}/Dpkg/Source
-%{perl_vendorlib}/Dpkg/Vendor
-%{perl_vendorlib}/Dpkg/Control
-%{perl_vendorlib}/Dpkg/Compression/*.pm
-%{perl_vendorlib}/Dpkg/Interface/*.pm
-
-%{_mandir}/man3/Dpkg::BuildEnv.3.gz
-%{_mandir}/man3/Dpkg::BuildFlags.3.gz
-%{_mandir}/man3/Dpkg::BuildOptions.3.gz
-%{_mandir}/man3/Dpkg::Changelog.3.gz
-%{_mandir}/man3/Dpkg::Changelog::Debian.3.gz
-%{_mandir}/man3/Dpkg::Changelog::Entry.3.gz
-%{_mandir}/man3/Dpkg::Changelog::Entry::Debian.3.gz
-%{_mandir}/man3/Dpkg::Changelog::Parse.3.gz
-%{_mandir}/man3/Dpkg::Checksums.3.gz
-%{_mandir}/man3/Dpkg::Compression.3.gz
-%{_mandir}/man3/Dpkg::Compression::FileHandle.3.gz
-%{_mandir}/man3/Dpkg::Compression::Process.3.gz
-%{_mandir}/man3/Dpkg::Conf.3.gz
-%{_mandir}/man3/Dpkg::Control.3.gz
-%{_mandir}/man3/Dpkg::Control::Changelog.3.gz
-%{_mandir}/man3/Dpkg::Control::Fields.3.gz
-%{_mandir}/man3/Dpkg::Control::Hash.3.gz
-%{_mandir}/man3/Dpkg::Control::Info.3.gz
-%{_mandir}/man3/Dpkg::Control::Types.3.gz
-%{_mandir}/man3/Dpkg::Deps.3.gz
-%{_mandir}/man3/Dpkg::IPC.3.gz
-%{_mandir}/man3/Dpkg::Index.3.gz
-%{_mandir}/man3/Dpkg::Interface::Storable.3.gz
-%{_mandir}/man3/Dpkg::Path.3.gz
-%{_mandir}/man3/Dpkg::Source::Package.3.gz
-%{_mandir}/man3/Dpkg::Substvars.3.gz
-%{_mandir}/man3/Dpkg::Vendor.3.gz
-%{_mandir}/man3/Dpkg::Vendor::Debian.3.gz
-%{_mandir}/man3/Dpkg::Vendor::Default.3.gz
-%{_mandir}/man3/Dpkg::Vendor::Ubuntu.3.gz
-%{_mandir}/man3/Dpkg::Version.3.gz
+%{perl_vendorlib}/Dpkg*
+%{_mandir}/man3/Dpkg*.3*
 
 
 %files -n dselect -f dselect.lang
@@ -366,12 +331,21 @@ create_logfile
 %{_mandir}/*/man1/dselect.1.gz
 %{_mandir}/man5/dselect.cfg.5.gz
 %{_mandir}/*/man5/dselect.cfg.5.gz
-%dir %{_sysconfdir}/dpkg/dselect.cfg.d
+%dir %{pkgconfdir}/dselect.cfg.d
 /var/lib/dpkg/methods
 
 
 %changelog
-* Sat Jun 29 2013 Sérgio Basto <sergio@serjux.com>
+* Sun Jun 30 2013 Sérgio Basto <sergio@serjux.com> - 1.16.10-5
+- rhbz #979378 
+  - Obsolete the old dpkg-devel.noarch (replaced by dpkg-dev)
+  (Obsoletes: dpkg-devel < 1.16)
+  - Readd to dpkg-perl: Requires: dpkg = %{version}-%{release}
+  - Patchset Signed-off-by: Oron Peled
+  - [PATCH 1/4] move dpkg.cfg from /etc to /etc/dpkg 
+  - [PATCH 2/4] fix some pkgdatadir, pkgconfdir file locations
+  - [PATCH 3/4] move "dpkg-dev.mo" files to dpkg-perl
+  - [PATCH 4/4] minor fix to dpkg-perl ownerships
 - move from dpkg to dpkg-dev, rhbz #979378 
   - dpkg-mergechangelogs and its man-pages
   - dpkg-buildflags and its man-pages
