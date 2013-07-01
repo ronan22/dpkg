@@ -1,9 +1,9 @@
-%global	pkgconfdir	%{_sysconfdir}/dpkg
-%global	pkgdatadir	%{_datadir}/dpkg
+%global pkgconfdir      %{_sysconfdir}/dpkg
+%global pkgdatadir      %{_datadir}/dpkg
 
 Name:           dpkg
 Version:        1.16.10
-Release:        5%{?dist}
+Release:        6%{?dist}
 Summary:        Package maintenance system for Debian Linux
 Group:          System Environment/Base
 # The entire source code is GPLv2+ with exception of the following
@@ -16,6 +16,7 @@ License:        GPLv2 and GPLv2+ and LGPLv2+ and Public Domain and BSD
 URL:            http://packages.debian.org/unstable/admin/dpkg
 Source0:        http://ftp.debian.org/debian/pool/main/d/dpkg/%{name}_%{version}.tar.xz
 Patch0:         dpkg-perl-libexecdir.patch
+Patch1:         dpkg-fix-logrotate.patch
 BuildRequires:  zlib-devel bzip2-devel libselinux-devel gettext ncurses-devel
 BuildRequires:  autoconf automake gettext-devel
 BuildRequires:  doxygen flex xz-devel po4a dotconf-devel
@@ -104,6 +105,7 @@ dselect is a high-level interface for the installation/removal of debs .
 %prep
 %setup -q
 %patch0 -p1
+%patch1 -p1
 
 # Filter unwanted Requires:
 cat << \EOF > %{name}-req
@@ -128,16 +130,20 @@ make %{?_smp_mflags}
 
 
 %install
-make install DESTDIR=$RPM_BUILD_ROOT
+make install DESTDIR=%{buildroot}
 
 mkdir -p %{buildroot}/%{pkgconfdir}/dpkg.cfg.d
 mkdir -p %{buildroot}/%{pkgconfdir}/dselect.cfg.d
 
 # from debian/dpkg.install
-install -pm0644 debian/archtable $RPM_BUILD_ROOT/%{pkgdatadir}/archtable
-install -pm0644 debian/dpkg.cfg $RPM_BUILD_ROOT/%{pkgconfdir}
-install -pm0644 debian/shlibs.default $RPM_BUILD_ROOT/%{pkgconfdir}
-install -pm0644 debian/shlibs.override $RPM_BUILD_ROOT/%{pkgconfdir}
+install -pm0644 debian/archtable %{buildroot}/%{pkgdatadir}/archtable
+install -pm0644 debian/dpkg.cfg %{buildroot}/%{pkgconfdir}
+install -pm0644 debian/shlibs.default %{buildroot}/%{pkgconfdir}
+install -pm0644 debian/shlibs.override %{buildroot}/%{pkgconfdir}
+
+# patched debian/dpkg.logrotate
+mkdir -p %{buildroot}/%{_sysconfdir}/logrotate.d
+install -pm0644 debian/dpkg.logrotate %{buildroot}/%{_sysconfdir}/logrotate.d/%{name}
 
 
 %find_lang dpkg
@@ -145,14 +151,14 @@ install -pm0644 debian/shlibs.override $RPM_BUILD_ROOT/%{pkgconfdir}
 %find_lang dselect
 
 # fedora has its own implementation
-rm $RPM_BUILD_ROOT%{_bindir}/update-alternatives
-rm $RPM_BUILD_ROOT%{_mandir}/man8/update-alternatives.8
-rm -rf $RPM_BUILD_ROOT%{_mandir}/*/man8/update-alternatives.8
-rm -rf $RPM_BUILD_ROOT%{_sysconfdir}/alternatives/
+rm %{buildroot}%{_bindir}/update-alternatives
+rm %{buildroot}%{_mandir}/man8/update-alternatives.8
+rm -rf %{buildroot}%{_mandir}/*/man8/update-alternatives.8
+rm -rf %{buildroot}%{_sysconfdir}/alternatives/
 
 #fedora has own implemenation
 #FIXME should we remove this ? 
-rm -rf $RPM_BUILD_ROOT%{_sbindir}/install-info
+rm -rf %{buildroot}%{_sbindir}/install-info
 
 mkdir -p %{buildroot}/var/lib/dpkg/alternatives %{buildroot}/var/lib/dpkg/info \
  %{buildroot}/var/lib/dpkg/parts %{buildroot}/var/lib/dpkg/updates \
@@ -185,10 +191,13 @@ create_logfile
 
 %files   -f dpkg.lang
 %defattr(-,root,root,-)
-%doc debian/changelog README AUTHORS COPYING THANKS TODO
+%doc debian/changelog README AUTHORS THANKS TODO
+%doc debian/copyright debian/usertags
+%doc doc/README.feature-removal-schedule doc/triggers.txt
 %dir %{pkgconfdir}
 %dir %{pkgconfdir}/dpkg.cfg.d
 %config(noreplace) %{pkgconfdir}/dpkg.cfg
+%config(noreplace) %{_sysconfdir}/logrotate.d/dpkg
 %{_bindir}/dpkg
 %{_bindir}/dpkg-deb
 %{_bindir}/dpkg-maintscript-helper
@@ -234,7 +243,7 @@ create_logfile
 
 %files dev
 %defattr(-,root,root,-)
-%doc doc/README.api
+%doc doc/README.api doc/coding-style.txt doc/frontend.txt
 %config(noreplace) %{pkgconfdir}/shlibs.default
 %config(noreplace) %{pkgconfdir}/shlibs.override
 %{_bindir}/dpkg-architecture
@@ -336,11 +345,16 @@ create_logfile
 
 
 %changelog
+* Mon Jul 01 2013 Sérgio Basto <sergio@serjux.com> - 1.16.10-6
+- add support to logrotate, by Oron Peled, rhbz #979378
+- added some new %doc and debian/copyright, by Oron Peled, rhbz #979378
+- rpmlint cleanups, by Oron Peled, rhbz #979378 
+
 * Sun Jun 30 2013 Sérgio Basto <sergio@serjux.com> - 1.16.10-5
 - rhbz #979378 
   - Obsolete the old dpkg-devel.noarch (replaced by dpkg-dev)
   (Obsoletes: dpkg-devel < 1.16)
-  - Readd to dpkg-perl: Requires: dpkg = %{version}-%{release}
+  - Readd to dpkg-perl: Requires: dpkg = <version>-<release>
   - Patchset Signed-off-by: Oron Peled
   - [PATCH 1/4] move dpkg.cfg from /etc to /etc/dpkg 
   - [PATCH 2/4] fix some pkgdatadir, pkgconfdir file locations
