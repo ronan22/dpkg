@@ -3,7 +3,7 @@
 
 Name:           dpkg
 Version:        1.16.10
-Release:        6%{?dist}
+Release:        7%{?dist}
 Summary:        Package maintenance system for Debian Linux
 Group:          System Environment/Base
 # The entire source code is GPLv2+ with exception of the following
@@ -345,6 +345,9 @@ create_logfile
 
 
 %changelog
+* Wed Jul 17 2013 Petr Pisar <ppisar@redhat.com> - 1.16.10-7
+- Perl 5.18 rebuild
+
 * Mon Jul 01 2013 Sérgio Basto <sergio@serjux.com> - 1.16.10-6
 - add support to logrotate, by Oron Peled, rhbz #979378
 - added some new %doc and debian/copyright, by Oron Peled, rhbz #979378
