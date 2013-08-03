@@ -3,7 +3,7 @@
 
 Name:           dpkg
 Version:        1.16.10
-Release:        7%{?dist}
+Release:        8%{?dist}
 Summary:        Package maintenance system for Debian Linux
 Group:          System Environment/Base
 # The entire source code is GPLv2+ with exception of the following
@@ -345,6 +345,9 @@ create_logfile
 
 
 %changelog
+* Sat Aug 03 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.16.10-8
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_20_Mass_Rebuild
+
 * Wed Jul 17 2013 Petr Pisar <ppisar@redhat.com> - 1.16.10-7
 - Perl 5.18 rebuild
 
