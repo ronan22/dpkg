@@ -2,8 +2,8 @@
 %global pkgdatadir      %{_datadir}/dpkg
 
 Name:           dpkg
-Version:        1.16.10
-Release:        8%{?dist}
+Version:        1.16.12
+Release:        1%{?dist}
 Summary:        Package maintenance system for Debian Linux
 Group:          System Environment/Base
 # The entire source code is GPLv2+ with exception of the following
@@ -134,6 +134,17 @@ make install DESTDIR=%{buildroot}
 
 mkdir -p %{buildroot}/%{pkgconfdir}/dpkg.cfg.d
 mkdir -p %{buildroot}/%{pkgconfdir}/dselect.cfg.d
+mkdir -p %{buildroot}/%{pkgconfdir}/origins
+
+# Prepare "vendor" files for dpkg-vendor
+cat <<EOF > %{buildroot}/%{pkgconfdir}/origins/fedora
+Vendor: Fedora
+Vendor-URL: http://www.fedoraproject.org/
+Bugs: https://bugzilla.redhat.com
+EOF
+%if 0%{?fedora}
+ln -sf fedora %{buildroot}/%{pkgconfdir}/origins/default
+%endif
 
 # from debian/dpkg.install
 install -pm0644 debian/archtable %{buildroot}/%{pkgdatadir}/archtable
@@ -196,7 +207,9 @@ create_logfile
 %doc doc/README.feature-removal-schedule doc/triggers.txt
 %dir %{pkgconfdir}
 %dir %{pkgconfdir}/dpkg.cfg.d
+%dir %{pkgconfdir}/origins
 %config(noreplace) %{pkgconfdir}/dpkg.cfg
+%config(noreplace) %{pkgconfdir}/origins/*
 %config(noreplace) %{_sysconfdir}/logrotate.d/dpkg
 %{_bindir}/dpkg
 %{_bindir}/dpkg-deb
@@ -345,6 +358,11 @@ create_logfile
 
 
 %changelog
+* Wed Oct 16 2013 Sérgio Basto <sergio@serjux.com> - 1.16.12-1
+- Update to 1.16.12
+- added /etc/dpkg/origins/... , by Oron Peled, rhbz #973832
+- fix few files listed twice.
+
 * Sat Aug 03 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.16.10-8
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_20_Mass_Rebuild
 
