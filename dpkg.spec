@@ -2,7 +2,7 @@
 %global pkgdatadir      %{_datadir}/dpkg
 
 Name:           dpkg
-Version:        1.16.12
+Version:        1.16.14
 Release:        1%{?dist}
 Summary:        Package maintenance system for Debian Linux
 Group:          System Environment/Base
@@ -358,6 +358,9 @@ create_logfile
 
 
 %changelog
+* Sat May 10 2014 Sérgio Basto <sergio@serjux.com> - 1.16.14-1
+- Update to 1.16.14, fixes CVE-2014-0471, rhbz #1092210 .
+
 * Wed Oct 16 2013 Sérgio Basto <sergio@serjux.com> - 1.16.12-1
 - Update to 1.16.12
 - added /etc/dpkg/origins/... , by Oron Peled, rhbz #973832
