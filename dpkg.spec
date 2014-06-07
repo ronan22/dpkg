@@ -3,7 +3,7 @@
 
 Name:           dpkg
 Version:        1.16.14
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Package maintenance system for Debian Linux
 Group:          System Environment/Base
 # The entire source code is GPLv2+ with exception of the following
@@ -358,6 +358,9 @@ create_logfile
 
 
 %changelog
+* Sat Jun 07 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.16.14-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_21_Mass_Rebuild
+
 * Sat May 10 2014 Sérgio Basto <sergio@serjux.com> - 1.16.14-1
 - Update to 1.16.14, fixes CVE-2014-0471, rhbz #1092210 .
 
