@@ -2,8 +2,8 @@
 %global pkgdatadir      %{_datadir}/dpkg
 
 Name:           dpkg
-Version:        1.16.14
-Release:        2%{?dist}
+Version:        1.16.15
+Release:        1%{?dist}
 Summary:        Package maintenance system for Debian Linux
 Group:          System Environment/Base
 # The entire source code is GPLv2+ with exception of the following
@@ -275,6 +275,7 @@ create_logfile
 %{_bindir}/dpkg-shlibdeps
 %{_bindir}/dpkg-source
 %{_bindir}/dpkg-vendor
+%{_libdir}/dpkg/parsechangelog
 %{pkgdatadir}/*.mk
 %{_mandir}/man1/dpkg-architecture.1.gz
 %{_mandir}/man1/dpkg-buildflags.1.gz
@@ -337,11 +338,8 @@ create_logfile
 
 %files perl -f dpkg-dev.lang
 %defattr(-,root,root,-)
-%{_libexecdir}/dpkg/parsechangelog
-
 %{perl_vendorlib}/Dpkg*
 %{_mandir}/man3/Dpkg*.3*
-
 
 %files -n dselect -f dselect.lang
 %defattr(-,root,root,-)
@@ -358,6 +356,9 @@ create_logfile
 
 
 %changelog
+* Mon Jun 23 2014 Sérgio Basto <sergio@serjux.com> - 1.16.15-1
+- Update to 1.16.15, fixes: CVE-2014-3864, CVE-2014-3865 , rhbz #1103026
+
 * Sat Jun 07 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.16.14-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_21_Mass_Rebuild
 
