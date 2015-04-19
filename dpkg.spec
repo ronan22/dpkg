@@ -2,8 +2,8 @@
 %global pkgdatadir      %{_datadir}/dpkg
 
 Name:           dpkg
-Version:        1.16.15
-Release:        2%{?dist}
+Version:        1.16.16
+Release:        1%{?dist}
 Summary:        Package maintenance system for Debian Linux
 Group:          System Environment/Base
 # The entire source code is GPLv2+ with exception of the following
@@ -356,6 +356,9 @@ create_logfile
 
 
 %changelog
+* Sun Apr 19 2015 Sérgio Basto <sergio@serjux.com> - 1.16.16-1
+- Security update to 1.16.16
+
 * Sat Aug 16 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.16.15-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_21_22_Mass_Rebuild
 
