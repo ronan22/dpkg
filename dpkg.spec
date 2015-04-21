@@ -222,6 +222,7 @@ create_logfile
 %{_bindir}/dpkg-trigger
 %{_bindir}/dpkg-divert
 %{_bindir}/dpkg-statoverride
+%{_libdir}/dpkg/parsechangelog
 %dir %{pkgdatadir}
 %{pkgdatadir}/abitable
 %{pkgdatadir}/archtable
@@ -278,7 +279,6 @@ create_logfile
 %{_bindir}/dpkg-shlibdeps
 %{_bindir}/dpkg-source
 %{_bindir}/dpkg-vendor
-%{_libdir}/dpkg/parsechangelog
 %{pkgdatadir}/*.mk
 %{_mandir}/man1/dpkg-architecture.1.gz
 %{_mandir}/man1/dpkg-buildflags.1.gz
