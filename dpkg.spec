@@ -3,7 +3,7 @@
 
 Name:           dpkg
 Version:        1.16.16
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Package maintenance system for Debian Linux
 Group:          System Environment/Base
 # The entire source code is GPLv2+ with exception of the following
@@ -15,11 +15,13 @@ Group:          System Environment/Base
 License:        GPLv2 and GPLv2+ and LGPLv2+ and Public Domain and BSD
 URL:            http://packages.debian.org/unstable/admin/dpkg
 Source0:        http://ftp.debian.org/debian/pool/main/d/dpkg/%{name}_%{version}.tar.xz
-Patch0:         dpkg-perl-libexecdir.patch
 Patch1:         dpkg-fix-logrotate.patch
 BuildRequires:  zlib-devel bzip2-devel libselinux-devel gettext ncurses-devel
 BuildRequires:  autoconf automake gettext-devel
-BuildRequires:  doxygen flex xz-devel po4a dotconf-devel
+BuildRequires:  doxygen flex xz-devel po4a
+%if 0%{?rhel} != 5 && 0%{?rhel} != 6
+BuildRequires:  dotconf-devel
+%endif
 # for /usr/bin/pod2man
 %if 0%{?fedora} > 18
 BuildRequires: perl-podlators
@@ -104,7 +106,6 @@ dselect is a high-level interface for the installation/removal of debs .
 
 %prep
 %setup -q
-%patch0 -p1
 %patch1 -p1
 
 # Filter unwanted Requires:
@@ -118,7 +119,9 @@ EOF
 chmod +x %{__perl_requires}
 
 %build
+%if 0%{?rhel} != 5 && 0%{?rhel} != 6
 autoreconf -fiv
+%endif
 %configure --disable-start-stop-daemon \
         --disable-linker-optimisations \
         --with-admindir=%{_localstatedir}/lib/dpkg \
@@ -275,7 +278,7 @@ create_logfile
 %{_bindir}/dpkg-shlibdeps
 %{_bindir}/dpkg-source
 %{_bindir}/dpkg-vendor
-%{_libexecdir}/dpkg/parsechangelog
+%{_libdir}/dpkg/parsechangelog
 %{pkgdatadir}/*.mk
 %{_mandir}/man1/dpkg-architecture.1.gz
 %{_mandir}/man1/dpkg-buildflags.1.gz
@@ -356,6 +359,9 @@ create_logfile
 
 
 %changelog
+* Tue Apr 21 2015 Sérgio Basto <sergio@serjux.com> - 1.16.16-2
+- some fixes and support for epel-6
+
 * Sun Apr 19 2015 Sérgio Basto <sergio@serjux.com> - 1.16.16-1
 - Security update to 1.16.16
 
