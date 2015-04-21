@@ -13,7 +13,7 @@ Group:          System Environment/Base
 # scripts/Dpkg/Gettext.pm - BSD
 # lib/compat/obstack.h, lib/compat/gettext.h,lib/compat/obstack.c - LGPLv2+
 License:        GPLv2 and GPLv2+ and LGPLv2+ and Public Domain and BSD
-URL:            http://packages.debian.org/unstable/admin/dpkg
+URL:            https://tracker.debian.org/pkg/dpkg
 Source0:        http://ftp.debian.org/debian/pool/main/d/dpkg/%{name}_%{version}.tar.xz
 Patch1:         dpkg-fix-logrotate.patch
 BuildRequires:  zlib-devel bzip2-devel libselinux-devel gettext ncurses-devel
