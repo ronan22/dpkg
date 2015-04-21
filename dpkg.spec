@@ -3,7 +3,7 @@
 
 Name:           dpkg
 Version:        1.16.16
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        Package maintenance system for Debian Linux
 Group:          System Environment/Base
 # The entire source code is GPLv2+ with exception of the following
@@ -359,8 +359,13 @@ create_logfile
 
 
 %changelog
+* Tue Apr 21 2015 Sérgio Basto <sergio@serjux.com> - 1.16.16-3
+- Better upstream URL .
+
 * Tue Apr 21 2015 Sérgio Basto <sergio@serjux.com> - 1.16.16-2
-- some fixes and support for epel-6
+- Some fixes and added support for epel-6 .
+- Removed Patch0: dpkg-perl-libexecdir.patch .
+- move %{_libdir}/dpkg/parsechangelog to archable package .
 
 * Sun Apr 19 2015 Sérgio Basto <sergio@serjux.com> - 1.16.16-1
 - Security update to 1.16.16
