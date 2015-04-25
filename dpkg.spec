@@ -1,9 +1,10 @@
 %global pkgconfdir      %{_sysconfdir}/dpkg
 %global pkgdatadir      %{_datadir}/dpkg
+%global _libdir         %{_libexecdir}
 
 Name:           dpkg
 Version:        1.16.16
-Release:        3%{?dist}
+Release:        4%{?dist}
 Summary:        Package maintenance system for Debian Linux
 Group:          System Environment/Base
 # The entire source code is GPLv2+ with exception of the following
@@ -120,6 +121,11 @@ chmod +x %{__perl_requires}
 
 %build
 %if 0%{?rhel} != 5 && 0%{?rhel} != 6
+# We can't run autoreconf on epel <= 6 because needs gettext-0.18 when epel6
+# only have gettext-0.17:
+# autopoint: *** The AM_GNU_GETTEXT_VERSION declaration in your configure.ac
+# file requires the infrastructure from gettext-0.18 but this version
+# is older. Please upgrade to gettext-0.18 or newer.
 autoreconf -fiv
 %endif
 %configure --disable-start-stop-daemon \
@@ -222,7 +228,6 @@ create_logfile
 %{_bindir}/dpkg-trigger
 %{_bindir}/dpkg-divert
 %{_bindir}/dpkg-statoverride
-%{_libdir}/dpkg/parsechangelog
 %dir %{pkgdatadir}
 %{pkgdatadir}/abitable
 %{pkgdatadir}/archtable
@@ -279,6 +284,7 @@ create_logfile
 %{_bindir}/dpkg-shlibdeps
 %{_bindir}/dpkg-source
 %{_bindir}/dpkg-vendor
+%{_libexecdir}/dpkg/parsechangelog
 %{pkgdatadir}/*.mk
 %{_mandir}/man1/dpkg-architecture.1.gz
 %{_mandir}/man1/dpkg-buildflags.1.gz
@@ -359,6 +365,10 @@ create_logfile
 
 
 %changelog
+* Sat Apr 25 2015 Sérgio Basto <sergio@serjux.com> - 1.16.16-4
+- Revert location of dpkg/parsechangelog .
+- Fix build for all versions, including epel-6 .
+
 * Tue Apr 21 2015 Sérgio Basto <sergio@serjux.com> - 1.16.16-3
 - Better upstream URL .
 
