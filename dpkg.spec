@@ -371,7 +371,7 @@ create_logfile
 %changelog
 * Sun Apr 26 2015 Sérgio Basto <sergio@serjux.com> - 1.16.16-5
 - Fix build for all versions, previous try wasn't correct and back with
-  dpkg-perl-libexecdir.epel6.patch .
+  dpkg-perl-libexecdir.patch .
 - Added dpkg-perl-libexecdir.epel6.patch just for fix epel <= 6 .
 - Cleaned some trailing whitespaces.
 - Use _localstatedir instead /var .
