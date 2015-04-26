@@ -1,10 +1,9 @@
 %global pkgconfdir      %{_sysconfdir}/dpkg
 %global pkgdatadir      %{_datadir}/dpkg
-%global _libdir         %{_libexecdir}
 
 Name:           dpkg
 Version:        1.16.16
-Release:        4%{?dist}
+Release:        5%{?dist}
 Summary:        Package maintenance system for Debian Linux
 Group:          System Environment/Base
 # The entire source code is GPLv2+ with exception of the following
@@ -16,7 +15,9 @@ Group:          System Environment/Base
 License:        GPLv2 and GPLv2+ and LGPLv2+ and Public Domain and BSD
 URL:            https://tracker.debian.org/pkg/dpkg
 Source0:        http://ftp.debian.org/debian/pool/main/d/dpkg/%{name}_%{version}.tar.xz
+Patch0:         dpkg-perl-libexecdir.patch
 Patch1:         dpkg-fix-logrotate.patch
+Patch2:         dpkg-perl-libexecdir.epel6.patch
 BuildRequires:  zlib-devel bzip2-devel libselinux-devel gettext ncurses-devel
 BuildRequires:  autoconf automake gettext-devel
 BuildRequires:  doxygen flex xz-devel po4a
@@ -26,19 +27,18 @@ BuildRequires:  dotconf-devel
 # for /usr/bin/pod2man
 %if 0%{?fedora} > 18
 BuildRequires: perl-podlators
-%else 
+%else
 BuildRequires: perl
 %endif
 
-%description 
-
-This package contains the tools (including dpkg-source) required 
+%description
+This package contains the tools (including dpkg-source) required
 to unpack, build and upload Debian source packages.
 
-This package also contains the programs dpkg which used to handle the 
+This package also contains the programs dpkg which used to handle the
 installation and removal of packages on a Debian system.
 
-This package also contains dselect, an interface for managing the 
+This package also contains dselect, an interface for managing the
 installation and removal of packages on the system.
 
 dpkg and dselect will certainly be non-functional on a rpm-based system
@@ -103,11 +103,15 @@ Group:    System Environment/Base
 Requires: %{name} = %{version}-%{release}
 
 %description -n dselect
-dselect is a high-level interface for the installation/removal of debs . 
+dselect is a high-level interface for the installation/removal of debs .
 
 %prep
 %setup -q
+%patch0 -p1
 %patch1 -p1
+%if 0%{?rhel} <= 6
+%patch2 -p1
+%endif
 
 # Filter unwanted Requires:
 cat << \EOF > %{name}-req
@@ -177,12 +181,12 @@ rm -rf %{buildroot}%{_mandir}/*/man8/update-alternatives.8
 rm -rf %{buildroot}%{_sysconfdir}/alternatives/
 
 #fedora has own implemenation
-#FIXME should we remove this ? 
+#FIXME should we remove this ?
 rm -rf %{buildroot}%{_sbindir}/install-info
 
-mkdir -p %{buildroot}/var/lib/dpkg/alternatives %{buildroot}/var/lib/dpkg/info \
- %{buildroot}/var/lib/dpkg/parts %{buildroot}/var/lib/dpkg/updates \
- %{buildroot}/var/lib/dpkg/methods
+mkdir -p %{buildroot}%{_localstatedir}/lib/dpkg/alternatives %{buildroot}%{_localstatedir}/lib/dpkg/info \
+ %{buildroot}%{_localstatedir}/lib/dpkg/parts %{buildroot}%{_localstatedir}/lib/dpkg/updates \
+ %{buildroot}%{_localstatedir}/lib/dpkg/methods
 
 
 %post
@@ -234,10 +238,10 @@ create_logfile
 %{pkgdatadir}/cputable
 %{pkgdatadir}/ostable
 %{pkgdatadir}/triplettable
-%dir /var/lib/dpkg/alternatives
-%dir /var/lib/dpkg/info
-%dir /var/lib/dpkg/parts
-%dir /var/lib/dpkg/updates
+%dir %{_localstatedir}/lib/dpkg/alternatives
+%dir %{_localstatedir}/lib/dpkg/info
+%dir %{_localstatedir}/lib/dpkg/parts
+%dir %{_localstatedir}/lib/dpkg/updates
 %{_mandir}/man1/dpkg.1.gz
 %{_mandir}/man1/dpkg-deb.1.gz
 %{_mandir}/man1/dpkg-maintscript-helper.1.gz
@@ -361,10 +365,17 @@ create_logfile
 %{_mandir}/man5/dselect.cfg.5.gz
 %{_mandir}/*/man5/dselect.cfg.5.gz
 %dir %{pkgconfdir}/dselect.cfg.d
-/var/lib/dpkg/methods
+%{_localstatedir}/lib/dpkg/methods
 
 
 %changelog
+* Sun Apr 26 2015 Sérgio Basto <sergio@serjux.com> - 1.16.16-5
+- Fix build for all versions, previous try wasn't correct and back with
+  dpkg-perl-libexecdir.epel6.patch .
+- Added dpkg-perl-libexecdir.epel6.patch just for fix epel <= 6 .
+- Cleaned some trailing whitespaces.
+- Use _localstatedir instead /var .
+
 * Sat Apr 25 2015 Sérgio Basto <sergio@serjux.com> - 1.16.16-4
 - Revert location of dpkg/parsechangelog .
 - Fix build for all versions, including epel-6 .
