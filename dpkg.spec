@@ -3,7 +3,7 @@
 
 Name:           dpkg
 Version:        1.16.16
-Release:        5%{?dist}
+Release:        6%{?dist}
 Summary:        Package maintenance system for Debian Linux
 Group:          System Environment/Base
 # The entire source code is GPLv2+ with exception of the following
@@ -369,6 +369,9 @@ create_logfile
 
 
 %changelog
+* Wed Jun 17 2015 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.16.16-6
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_23_Mass_Rebuild
+
 * Sun Apr 26 2015 Sérgio Basto <sergio@serjux.com> - 1.16.16-5
 - Fix build for all versions, previous try wasn't correct and back with
   dpkg-perl-libexecdir.patch .
