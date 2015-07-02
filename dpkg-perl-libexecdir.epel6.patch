@@ -1,6 +1,6 @@
---- dpkg-1.16.16.epel6/scripts/Makefile.in	2015-04-09 07:47:16.000000000 +0100
-+++ dpkg-1.16.16/scripts/Makefile.in	2015-04-26 01:35:34.275309326 +0100
-@@ -338,7 +392,7 @@ bin_SCRIPTS = \
+--- ./scripts/Makefile.in.orig	2015-04-10 01:37:03.000000000 +0100
++++ ./scripts/Makefile.in	2015-07-02 04:16:51.404577510 +0100
+@@ -415,7 +415,7 @@ bin_SCRIPTS = \
  	dpkg-source \
  	dpkg-vendor
  
@@ -9,12 +9,12 @@
  changelog_SCRIPTS = \
  	changelog/debian
  
-@@ -431,7 +485,7 @@ nobase_dist_perllib_DATA = \
- man3_MANS = 
- do_perl_subst = $(AM_V_GEN) \
+@@ -516,7 +516,7 @@ do_perl_subst = $(AM_V_GEN) \
  		sed -e "s:^\#![[:space:]]*/usr/bin/perl:\#!$(PERL):" \
--		    -e "s:\$$dpkglibdir[[:space:]]*=[[:space:]]*['\"][^'\"]*['\"]:\$$dpkglibdir=\"$(pkglibdir)\":" \
-+		    -e "s:\$$dpkglibdir[[:space:]]*=[[:space:]]*['\"][^'\"]*['\"]:\$$dpkglibdir=\"$(pkglibexecdir)\":" \
- 		    -e "s:\$$pkgdatadir[[:space:]]*=[[:space:]]*['\"][^'\"]*['\"]:\$$pkgdatadir=\"$(pkgdatadir)\":" \
- 		    -e "s:\$$admindir[[:space:]]*=[[:space:]]*['\"][^'\"]*['\"]:\$$admindir=\"$(admindir)\":" \
- 		    -e "s:\$$version[[:space:]]*=[[:space:]]*['\"][^'\"]*[\"']:\$$version=\"$(PACKAGE_VERSION)\":"
+ 		    -e "s:\$$CONFDIR[[:space:]]*=[[:space:]]*['\"][^'\"]*['\"]:\$$CONFDIR='$(pkgconfdir)':" \
+ 		    -e "s:\$$ADMINDIR[[:space:]]*=[[:space:]]*['\"][^'\"]*['\"]:\$$ADMINDIR='$(admindir)':" \
+-		    -e "s:\$$LIBDIR[[:space:]]*=[[:space:]]*['\"][^'\"]*['\"]:\$$LIBDIR='$(pkglibdir)':" \
++		    -e "s:\$$LIBDIR[[:space:]]*=[[:space:]]*['\"][^'\"]*['\"]:\$$LIBDIR='$(pkglibexecdir)':" \
+ 		    -e "s:\$$DATADIR[[:space:]]*=[[:space:]]*['\"][^'\"]*['\"]:\$$DATADIR='$(pkgdatadir)':" \
+ 		    -e "s:\$$PROGVERSION[[:space:]]*=[[:space:]]*['\"][^'\"]*[\"']:\$$PROGVERSION='$(PACKAGE_VERSION)':"
+ 

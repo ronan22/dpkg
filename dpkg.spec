@@ -2,8 +2,8 @@
 %global pkgdatadir      %{_datadir}/dpkg
 
 Name:           dpkg
-Version:        1.16.16
-Release:        6%{?dist}
+Version:        1.17.25
+Release:        1%{?dist}
 Summary:        Package maintenance system for Debian Linux
 Group:          System Environment/Base
 # The entire source code is GPLv2+ with exception of the following
@@ -109,7 +109,7 @@ dselect is a high-level interface for the installation/removal of debs .
 %setup -q
 %patch0 -p1
 %patch1 -p1
-%if 0%{?rhel} <= 6
+%if 0%{?rhel} == 5 || 0%{?rhel} == 6
 %patch2 -p1
 %endif
 
@@ -160,8 +160,9 @@ ln -sf fedora %{buildroot}/%{pkgconfdir}/origins/default
 %endif
 
 # from debian/dpkg.install
-install -pm0644 debian/archtable %{buildroot}/%{pkgdatadir}/archtable
+install -pm0644 scripts/mk/*mk %{buildroot}/%{pkgdatadir}
 install -pm0644 debian/dpkg.cfg %{buildroot}/%{pkgconfdir}
+install -pm0644 debian/dselect.cfg %{buildroot}/%{pkgconfdir}
 install -pm0644 debian/shlibs.default %{buildroot}/%{pkgconfdir}
 install -pm0644 debian/shlibs.override %{buildroot}/%{pkgconfdir}
 
@@ -213,11 +214,10 @@ create_database
 create_logfile
 
 
-%files   -f dpkg.lang
-%defattr(-,root,root,-)
+%files -f dpkg.lang
 %doc debian/changelog README AUTHORS THANKS TODO
-%doc debian/copyright debian/usertags
-%doc doc/README.feature-removal-schedule doc/triggers.txt
+%doc doc/README.feature-removal-schedule debian/usertags debian/dpkg.cron.daily
+%license debian/copyright
 %dir %{pkgconfdir}
 %dir %{pkgconfdir}/dpkg.cfg.d
 %dir %{pkgconfdir}/origins
@@ -234,10 +234,10 @@ create_logfile
 %{_bindir}/dpkg-statoverride
 %dir %{pkgdatadir}
 %{pkgdatadir}/abitable
-%{pkgdatadir}/archtable
 %{pkgdatadir}/cputable
 %{pkgdatadir}/ostable
 %{pkgdatadir}/triplettable
+%{pkgdatadir}/*mk
 %dir %{_localstatedir}/lib/dpkg/alternatives
 %dir %{_localstatedir}/lib/dpkg/info
 %dir %{_localstatedir}/lib/dpkg/parts
@@ -262,14 +262,13 @@ create_logfile
 %{_mandir}/*/man8/dpkg-statoverride.8.gz
 
 %files devel
-%defattr(-,root,root,-)
 %{_libdir}/libdpkg.a
+%exclude %{_libdir}/libdpkg.la
 %{_libdir}/pkgconfig/libdpkg.pc
 %{_includedir}/dpkg/*.h
 
-%files dev
-%defattr(-,root,root,-)
-%doc doc/README.api doc/coding-style.txt doc/frontend.txt
+%files dev -f dpkg-dev.lang
+%doc AUTHORS THANKS debian/usertags doc/README.api doc/README.feature-removal-schedule doc/frontend.txt doc/triggers.txt
 %config(noreplace) %{pkgconfdir}/shlibs.default
 %config(noreplace) %{pkgconfdir}/shlibs.override
 %{_bindir}/dpkg-architecture
@@ -349,26 +348,32 @@ create_logfile
 %{_mandir}/*/man5/deb-version.5.gz
 %{_mandir}/*/man5/deb.5.gz
 
-%files perl -f dpkg-dev.lang
-%defattr(-,root,root,-)
+%files perl
 %{perl_vendorlib}/Dpkg*
 %{_mandir}/man3/Dpkg*.3*
 
 %files -n dselect -f dselect.lang
-%defattr(-,root,root,-)
 %doc dselect/methods/multicd/README.multicd dselect/methods/ftp/README.mirrors.txt
+%config(noreplace) %{pkgconfdir}/dselect.cfg
 %{_bindir}/dselect
-%{perl_vendorlib}/Debian
+%{perl_vendorlib}/Dselect
 %{_libdir}/dpkg/methods
 %{_mandir}/man1/dselect.1.gz
 %{_mandir}/*/man1/dselect.1.gz
 %{_mandir}/man5/dselect.cfg.5.gz
 %{_mandir}/*/man5/dselect.cfg.5.gz
 %dir %{pkgconfdir}/dselect.cfg.d
-%{_localstatedir}/lib/dpkg/methods
+%dir %{_localstatedir}/lib/dpkg/methods
 
 
 %changelog
+* Thu Jul 02 2015 Sérgio Basto <sergio@serjux.com> - 1.17.25-1
+- Update to 1.17.25 (Debian stable), adjustments following files
+  dpkg-1.17.25/debian/*.install, *.postinst, etc.
+- Rebased dpkg-perl-libexecdir.patch and dpkg-perl-libexecdir.epel6.patch
+- Removed old defattr tags.
+- Added License tag.
+
 * Wed Jun 17 2015 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.16.16-6
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_23_Mass_Rebuild
 
