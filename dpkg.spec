@@ -19,7 +19,7 @@ Patch0:         dpkg-perl-libexecdir.patch
 Patch1:         dpkg-fix-logrotate.patch
 Patch2:         dpkg-perl-libexecdir.epel6.patch
 BuildRequires:  zlib-devel bzip2-devel libselinux-devel gettext ncurses-devel
-BuildRequires:  autoconf automake gettext-devel
+BuildRequires:  autoconf automake gettext-devel libtool
 BuildRequires:  doxygen flex xz-devel po4a
 %if 0%{?rhel} != 5 && 0%{?rhel} != 6
 BuildRequires:  dotconf-devel
