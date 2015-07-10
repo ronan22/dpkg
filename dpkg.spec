@@ -3,7 +3,7 @@
 
 Name:           dpkg
 Version:        1.17.25
-Release:        1%{?dist}
+Release:        3%{?dist}
 Summary:        Package maintenance system for Debian Linux
 Group:          System Environment/Base
 # The entire source code is GPLv2+ with exception of the following
@@ -18,6 +18,7 @@ Source0:        http://ftp.debian.org/debian/pool/main/d/dpkg/%{name}_%{version}
 Patch0:         dpkg-perl-libexecdir.patch
 Patch1:         dpkg-fix-logrotate.patch
 Patch2:         dpkg-perl-libexecdir.epel6.patch
+Patch3:         dpkg-tar-invocation.patch
 BuildRequires:  zlib-devel bzip2-devel libselinux-devel gettext ncurses-devel
 BuildRequires:  autoconf automake gettext-devel libtool
 BuildRequires:  doxygen flex xz-devel po4a
@@ -112,6 +113,7 @@ dselect is a high-level interface for the installation/removal of debs .
 %if 0%{?rhel} == 5 || 0%{?rhel} == 6
 %patch2 -p1
 %endif
+%patch3 -p1
 
 # Filter unwanted Requires:
 cat << \EOF > %{name}-req
@@ -367,6 +369,9 @@ create_logfile
 
 
 %changelog
+* Fri Jul 10 2015 Sérgio Basto <sergio@serjux.com> - 1.17.25-3
+- call 'tar --no-recursion -T -' and not 'tar -T - --no-recursion' (#1241508)
+
 * Thu Jul 02 2015 Sérgio Basto <sergio@serjux.com> - 1.17.25-1
 - Update to 1.17.25 (Debian stable), adjustments following files
   dpkg-1.17.25/debian/*.install, *.postinst, etc.
