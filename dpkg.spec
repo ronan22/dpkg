@@ -3,7 +3,7 @@
 
 Name:           dpkg
 Version:        1.17.25
-Release:        3%{?dist}
+Release:        4%{?dist}
 Summary:        Package maintenance system for Debian Linux
 Group:          System Environment/Base
 # The entire source code is GPLv2+ with exception of the following
@@ -25,11 +25,11 @@ BuildRequires:  doxygen flex xz-devel po4a
 %if 0%{?rhel} != 5 && 0%{?rhel} != 6
 BuildRequires:  dotconf-devel
 %endif
+# for /usr/bin/perl
+BuildRequires: perl
 # for /usr/bin/pod2man
 %if 0%{?fedora} > 18
 BuildRequires: perl-podlators
-%else
-BuildRequires: perl
 %endif
 
 %description
@@ -74,6 +74,7 @@ Required to unpack, build and upload Debian source packages
 Summary: Dpkg perl modules
 Group:   System Environment/Base
 Requires: dpkg = %{version}-%{release}
+Requires: perl(:MODULE_COMPAT_%(eval "`perl -V:version`"; echo $version))
 Requires: perl, perl-TimeDate
 BuildArch: noarch
 
@@ -102,6 +103,7 @@ there are the following modules:
 Summary:  Debian package management front-end
 Group:    System Environment/Base
 Requires: %{name} = %{version}-%{release}
+Requires: perl(:MODULE_COMPAT_%(eval "`perl -V:version`"; echo $version))
 
 %description -n dselect
 dselect is a high-level interface for the installation/removal of debs .
@@ -369,6 +371,9 @@ create_logfile
 
 
 %changelog
+* Wed Jul 22 2015 Petr Pisar <ppisar@redhat.com> - 1.17.25-4
+- Require perl(:MODULE_COMPAT_) symbol by packages that provide Perl modules
+
 * Fri Jul 10 2015 Sérgio Basto <sergio@serjux.com> - 1.17.25-3
 - call 'tar --no-recursion -T -' and not 'tar -T - --no-recursion' (#1241508)
 
