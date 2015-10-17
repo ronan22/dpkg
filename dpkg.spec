@@ -3,7 +3,7 @@
 
 Name:           dpkg
 Version:        1.17.25
-Release:        5%{?dist}
+Release:        6%{?dist}
 Summary:        Package maintenance system for Debian Linux
 Group:          System Environment/Base
 # The entire source code is GPLv2+ with exception of the following
@@ -239,7 +239,6 @@ create_logfile
 %{pkgdatadir}/cputable
 %{pkgdatadir}/ostable
 %{pkgdatadir}/triplettable
-%{pkgdatadir}/*mk
 %dir %{_localstatedir}/lib/dpkg/alternatives
 %dir %{_localstatedir}/lib/dpkg/info
 %dir %{_localstatedir}/lib/dpkg/parts
@@ -288,7 +287,6 @@ create_logfile
 %{_bindir}/dpkg-shlibdeps
 %{_bindir}/dpkg-source
 %{_bindir}/dpkg-vendor
-%{_libexecdir}/dpkg/parsechangelog
 %{pkgdatadir}/*.mk
 %{_mandir}/man1/dpkg-architecture.1.gz
 %{_mandir}/man1/dpkg-buildflags.1.gz
@@ -352,6 +350,8 @@ create_logfile
 %files perl
 %{perl_vendorlib}/Dpkg*
 %{_mandir}/man3/Dpkg*.3*
+%{_libexecdir}/dpkg/parsechangelog
+
 
 %files -n dselect -f dselect.lang
 %doc dselect/methods/multicd/README.multicd dselect/methods/ftp/README.mirrors.txt
@@ -368,8 +368,15 @@ create_logfile
 
 
 %changelog
+* Sat Oct 17 2015 Sérgio Basto <sergio@serjux.com> - 1.17.25-6
+- Following debian/libdpkg-perl.install _libexecdir/dpkg/parsechangelog moved
+  into dpkg-perl.
+- Removed duplicated entries of _datadir/dpkg/*.mk in %%files, following
+  debian/dpkg-dev.install now only in dpkg-dev.
+
 * Sat Oct 17 2015 Sérgio Basto <sergio@serjux.com> - 1.17.25-5
 - Fix rhbz #1271133
+- Spec cleanups.
 
 * Wed Jul 22 2015 Petr Pisar <ppisar@redhat.com> - 1.17.25-4
 - Require perl(:MODULE_COMPAT_) symbol by packages that provide Perl modules
