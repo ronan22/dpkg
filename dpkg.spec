@@ -3,7 +3,7 @@
 
 Name:           dpkg
 Version:        1.17.25
-Release:        4%{?dist}
+Release:        5%{?dist}
 Summary:        Package maintenance system for Debian Linux
 Group:          System Environment/Base
 # The entire source code is GPLv2+ with exception of the following
@@ -115,7 +115,7 @@ dselect is a high-level interface for the installation/removal of debs .
 %if 0%{?rhel} == 5 || 0%{?rhel} == 6
 %patch2 -p1
 %endif
-%patch3 -p1
+%patch3 -p1 -b .tar
 
 # Filter unwanted Requires:
 cat << \EOF > %{name}-req
@@ -134,7 +134,7 @@ chmod +x %{__perl_requires}
 # autopoint: *** The AM_GNU_GETTEXT_VERSION declaration in your configure.ac
 # file requires the infrastructure from gettext-0.18 but this version
 # is older. Please upgrade to gettext-0.18 or newer.
-autoreconf -fiv
+autoreconf
 %endif
 %configure --disable-start-stop-daemon \
         --disable-linker-optimisations \
@@ -149,8 +149,6 @@ make %{?_smp_mflags}
 %install
 make install DESTDIR=%{buildroot}
 
-mkdir -p %{buildroot}/%{pkgconfdir}/dpkg.cfg.d
-mkdir -p %{buildroot}/%{pkgconfdir}/dselect.cfg.d
 mkdir -p %{buildroot}/%{pkgconfdir}/origins
 
 # Prepare "vendor" files for dpkg-vendor
@@ -164,7 +162,6 @@ ln -sf fedora %{buildroot}/%{pkgconfdir}/origins/default
 %endif
 
 # from debian/dpkg.install
-install -pm0644 scripts/mk/*mk %{buildroot}/%{pkgdatadir}
 install -pm0644 debian/dpkg.cfg %{buildroot}/%{pkgconfdir}
 install -pm0644 debian/dselect.cfg %{buildroot}/%{pkgconfdir}
 install -pm0644 debian/shlibs.default %{buildroot}/%{pkgconfdir}
@@ -174,10 +171,11 @@ install -pm0644 debian/shlibs.override %{buildroot}/%{pkgconfdir}
 mkdir -p %{buildroot}/%{_sysconfdir}/logrotate.d
 install -pm0644 debian/dpkg.logrotate %{buildroot}/%{_sysconfdir}/logrotate.d/%{name}
 
-
 %find_lang dpkg
 %find_lang dpkg-dev
 %find_lang dselect
+
+rm %{buildroot}%{_libdir}/libdpkg.la
 
 # fedora has its own implementation
 rm %{buildroot}%{_bindir}/update-alternatives
@@ -267,7 +265,6 @@ create_logfile
 
 %files devel
 %{_libdir}/libdpkg.a
-%exclude %{_libdir}/libdpkg.la
 %{_libdir}/pkgconfig/libdpkg.pc
 %{_includedir}/dpkg/*.h
 
@@ -371,6 +368,9 @@ create_logfile
 
 
 %changelog
+* Sat Oct 17 2015 Sérgio Basto <sergio@serjux.com> - 1.17.25-5
+- Fix rhbz #1271133
+
 * Wed Jul 22 2015 Petr Pisar <ppisar@redhat.com> - 1.17.25-4
 - Require perl(:MODULE_COMPAT_) symbol by packages that provide Perl modules
 
