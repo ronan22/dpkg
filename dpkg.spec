@@ -3,7 +3,7 @@
 
 Name:           dpkg
 Version:        1.17.25
-Release:        6%{?dist}
+Release:        7%{?dist}
 Summary:        Package maintenance system for Debian Linux
 Group:          System Environment/Base
 # The entire source code is GPLv2+ with exception of the following
@@ -368,6 +368,9 @@ create_logfile
 
 
 %changelog
+* Wed Feb 03 2016 Fedora Release Engineering <releng@fedoraproject.org> - 1.17.25-7
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_24_Mass_Rebuild
+
 * Sat Oct 17 2015 Sérgio Basto <sergio@serjux.com> - 1.17.25-6
 - Following debian/libdpkg-perl.install _libexecdir/dpkg/parsechangelog moved
   into dpkg-perl.
