@@ -3,7 +3,7 @@
 
 Name:           dpkg
 Version:        1.17.25
-Release:        7%{?dist}
+Release:        8%{?dist}
 Summary:        Package maintenance system for Debian Linux
 Group:          System Environment/Base
 # The entire source code is GPLv2+ with exception of the following
@@ -368,6 +368,9 @@ create_logfile
 
 
 %changelog
+* Tue May 17 2016 Jitka Plesnikova <jplesnik@redhat.com> - 1.17.25-8
+- Perl 5.24 rebuild
+
 * Wed Feb 03 2016 Fedora Release Engineering <releng@fedoraproject.org> - 1.17.25-7
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_24_Mass_Rebuild
 
