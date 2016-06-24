@@ -27,6 +27,7 @@ BuildRequires:  dotconf-devel
 %endif
 # for /usr/bin/perl
 BuildRequires: perl
+BuildRequires: perl-generators
 # for /usr/bin/pod2man
 %if 0%{?fedora} > 18
 BuildRequires: perl-podlators
