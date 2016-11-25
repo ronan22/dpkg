@@ -2,8 +2,8 @@
 %global pkgdatadir      %{_datadir}/dpkg
 
 Name:           dpkg
-Version:        1.17.25
-Release:        8%{?dist}
+Version:        1.17.27
+Release:        1%{?dist}
 Summary:        Package maintenance system for Debian Linux
 Group:          System Environment/Base
 # The entire source code is GPLv2+ with exception of the following
@@ -18,7 +18,6 @@ Source0:        http://ftp.debian.org/debian/pool/main/d/dpkg/%{name}_%{version}
 Patch0:         dpkg-perl-libexecdir.patch
 Patch1:         dpkg-fix-logrotate.patch
 Patch2:         dpkg-perl-libexecdir.epel6.patch
-Patch3:         dpkg-tar-invocation.patch
 BuildRequires:  zlib-devel bzip2-devel libselinux-devel gettext ncurses-devel
 BuildRequires:  autoconf automake gettext-devel libtool
 BuildRequires:  doxygen flex xz-devel po4a
@@ -116,7 +115,6 @@ dselect is a high-level interface for the installation/removal of debs .
 %if 0%{?rhel} == 5 || 0%{?rhel} == 6
 %patch2 -p1
 %endif
-%patch3 -p1 -b .tar
 
 # Filter unwanted Requires:
 cat << \EOF > %{name}-req
@@ -137,8 +135,7 @@ chmod +x %{__perl_requires}
 # is older. Please upgrade to gettext-0.18 or newer.
 autoreconf
 %endif
-%configure --disable-start-stop-daemon \
-        --disable-linker-optimisations \
+%configure --disable-linker-optimisations \
         --with-admindir=%{_localstatedir}/lib/dpkg \
         --with-selinux \
         --with-zlib \
@@ -235,6 +232,7 @@ create_logfile
 %{_bindir}/dpkg-trigger
 %{_bindir}/dpkg-divert
 %{_bindir}/dpkg-statoverride
+%{_sbindir}/start-stop-daemon
 %dir %{pkgdatadir}
 %{pkgdatadir}/abitable
 %{pkgdatadir}/cputable
@@ -253,6 +251,7 @@ create_logfile
 %{_mandir}/man5/dpkg.cfg.5.gz
 %{_mandir}/man8/dpkg-divert.8.gz
 %{_mandir}/man8/dpkg-statoverride.8.gz
+%{_mandir}/man8/start-stop-daemon.8.gz
 %{_mandir}/*/man1/dpkg.1.gz
 %{_mandir}/*/man1/dpkg-deb.1.gz
 %{_mandir}/*/man1/dpkg-maintscript-helper.1.gz
@@ -262,6 +261,7 @@ create_logfile
 %{_mandir}/*/man5/dpkg.cfg.5.gz
 %{_mandir}/*/man8/dpkg-divert.8.gz
 %{_mandir}/*/man8/dpkg-statoverride.8.gz
+%{_mandir}/*/man8/start-stop-daemon.8.gz
 
 %files devel
 %{_libdir}/libdpkg.a
@@ -369,6 +369,12 @@ create_logfile
 
 
 %changelog
+* Fri Nov 25 2016 Sérgio Basto <sergio@serjux.com> - 1.17.27-1
+- New upstream vesion, 1.17.27, fixes CVE-2015-0860
+- Add start-stop-daemon because could be useful: https://github.com/gammu/gammu/issues/75 (RH
+  system not support start-stop-daemon)
+- Drop dpkg-tar-invocation.patch it is already is sources.
+
 * Tue May 17 2016 Jitka Plesnikova <jplesnik@redhat.com> - 1.17.25-8
 - Perl 5.24 rebuild
 
