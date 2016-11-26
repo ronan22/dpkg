@@ -2,7 +2,7 @@
 %global pkgdatadir      %{_datadir}/dpkg
 
 Name:           dpkg
-Version:        1.17.27
+Version:        1.18.15
 Release:        1%{?dist}
 Summary:        Package maintenance system for Debian Linux
 Group:          System Environment/Base
@@ -369,6 +369,9 @@ create_logfile
 
 
 %changelog
+* Sat Nov 26 2016 Sérgio Basto <sergio@serjux.com> - 1.18.15-1
+- New major release, 1.18.15
+
 * Fri Nov 25 2016 Sérgio Basto <sergio@serjux.com> - 1.17.27-1
 - New upstream vesion, 1.17.27, fixes CVE-2015-0860
 - Add start-stop-daemon because could be useful: https://github.com/gammu/gammu/issues/75 (RH
