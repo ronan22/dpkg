@@ -26,6 +26,7 @@ BuildRequires:  dotconf-devel
 %endif
 # for /usr/bin/perl
 BuildRequires: perl
+BuildRequires: perl-devel
 BuildRequires: perl-generators
 # for /usr/bin/pod2man
 %if 0%{?fedora} > 18
@@ -33,6 +34,9 @@ BuildRequires: perl-podlators
 %endif
 
 %description
+This package provides the low-level infrastructure for handling the
+installation and removal of Debian software packages.
+
 This package contains the tools (including dpkg-source) required
 to unpack, build and upload Debian source packages.
 
@@ -44,6 +48,7 @@ installation and removal of packages on the system.
 
 dpkg and dselect will certainly be non-functional on a rpm-based system
 because packages dependencies will likely be unmet.
+
 
 %package devel
 Summary: Debian package management static library
@@ -67,37 +72,61 @@ Obsoletes: dpkg-devel < 1.16
 BuildArch: noarch
 
 %description dev
-This package provides the development tools (including dpkg-source).
-Required to unpack, build and upload Debian source packages
+This package provides the development tools (including dpkg-source)
+required to unpack, build and upload Debian source packages.
+ .
+Most Debian source packages will require additional tools to build;
+for example, most packages need make and the C compiler gcc.
 
 %package perl
 Summary: Dpkg perl modules
 Group:   System Environment/Base
 Requires: dpkg = %{version}-%{release}
 Requires: perl(:MODULE_COMPAT_%(eval "`perl -V:version`"; echo $version))
-Requires: perl, perl-TimeDate
+Requires: perl-TimeDate
 BuildArch: noarch
 
 %description perl
 This package provides the perl modules used by the scripts
-in dpkg-dev. They cover a wide range of functionalities. Among them
-there are the following modules:
-  - Dpkg::Arch: manipulate Debian architecture information
-  - Dpkg::BuildOptions: parse and manipulate DEB_BUILD_OPTIONS
-  - Dpkg::Changelog: parse Debian changelogs
-  - Dpkg::Checksums: generate and parse checksums
-  - Dpkg::Compression::Process: wrapper around compression tools
-  - Dpkg::Compression::FileHandle: transparently (de)compress files
-  - Dpkg::Control: parse and manipulate Debian control information
-    (.dsc, .changes, Packages/Sources entries, etc.)
-  - Dpkg::Deps: parse and manipulate dependencies
-  - Dpkg::ErrorHandling: common error functions
-  - Dpkg::Index: collections of Dpkg::Control (Packages/Sources files for
-    example)
-  - Dpkg::IPC: spawn sub-processes and feed/retrieve data
-  - Dpkg::Substvars: substitute variables in strings
-  - Dpkg::Vendor: identify current distribution vendor
-  - Dpkg::Version: parse and manipulate Debian package versions
+in dpkg-dev. They cover a wide range of functionality. Among them
+there are the following public modules:
+.
+ - Dpkg: core variables
+ - Dpkg::Arch: architecture handling functions
+ - Dpkg::Build::Info: build information functions
+ - Dpkg::BuildFlags: set, modify and query compilation build flags
+ - Dpkg::BuildOptions: parse and manipulate DEB_BUILD_OPTIONS
+ - Dpkg::BuildProfile: parse and manipulate build profiles
+ - Dpkg::Changelog: parse changelogs
+ - Dpkg::Changelog::Entry: represents a changelog entry
+ - Dpkg::Changelog::Parse: generic changelog parser for dpkg-parsechangelog
+ - Dpkg::Checksums: generate and parse checksums
+ - Dpkg::Compression: simple database of available compression methods
+ - Dpkg::Compression::Process: wrapper around compression tools
+ - Dpkg::Compression::FileHandle: transparently (de)compress files
+ - Dpkg::Conf: parse dpkg configuration files
+ - Dpkg::Control: parse and manipulate Debian control information
+   (.dsc, .changes, Packages/Sources entries, etc.)
+ - Dpkg::Control::Changelog: represent fields output by dpkg-parsechangelog
+ - Dpkg::Control::Fields: manage (list of known) control fields
+ - Dpkg::Control::Hash: parse and manipulate a block of RFC822-like fields
+ - Dpkg::Control::Info: parse files like debian/control
+ - Dpkg::Control::Tests: parse files like debian/tests/control
+ - Dpkg::Deps: parse and manipulate dependencies
+ - Dpkg::Exit: push, pop and run exit handlers
+ - Dpkg::Gettext: wrapper around Locale::gettext
+ - Dpkg::IPC: spawn sub-processes and feed/retrieve data
+ - Dpkg::Index: collections of Dpkg::Control (Packages/Sources files for
+   example)
+ - Dpkg::Interface::Storable: base object serializer
+ - Dpkg::Path: common path handling functions
+ - Dpkg::Source::Package: extract Debian source packages
+ - Dpkg::Substvars: substitute variables in strings
+ - Dpkg::Vendor: identify current distribution vendor
+ - Dpkg::Version: parse and manipulate Debian package versions
+.
+All the packages listed in Suggests or Recommends are used by some of the
+modules.
 
 %package -n dselect
 Summary:  Debian package management front-end
@@ -106,11 +135,14 @@ Requires: %{name} = %{version}-%{release}
 Requires: perl(:MODULE_COMPAT_%(eval "`perl -V:version`"; echo $version))
 
 %description -n dselect
-dselect is a high-level interface for the installation/removal of debs .
+dselect is a high-level interface for managing the installation and
+removal of Debian software packages.
+.
+Many users find dselect intimidating and new users may prefer to use apt-based user interfaces.
 
 %prep
 %setup -q
-%patch0 -p1
+#patch0 -p1
 %patch1 -p1
 %if 0%{?rhel} == 5 || 0%{?rhel} == 6
 %patch2 -p1
@@ -137,10 +169,14 @@ autoreconf
 %endif
 %configure --disable-linker-optimisations \
         --with-admindir=%{_localstatedir}/lib/dpkg \
-        --with-selinux \
-        --with-zlib \
-        --with-bz2
+        --with-libselinux \
+        --without-libmd \
+        --with-libz \
+        --with-liblzma \
+        --with-libbz2
 
+# todo add this
+#--with-devlibdir=\$${prefix}/lib/$(DEB_HOST_MULTIARCH) \
 make %{?_smp_mflags}
 
 
@@ -177,9 +213,9 @@ rm %{buildroot}%{_libdir}/libdpkg.la
 
 # fedora has its own implementation
 rm %{buildroot}%{_bindir}/update-alternatives
-rm %{buildroot}%{_mandir}/man8/update-alternatives.8
-rm -rf %{buildroot}%{_mandir}/*/man8/update-alternatives.8
-rm -rf %{buildroot}%{_sysconfdir}/alternatives/
+rm %{buildroot}%{_mandir}/man1/update-alternatives.1
+rm -r %{buildroot}%{_mandir}/*/man1/update-alternatives.1
+rm -r %{buildroot}%{_sysconfdir}/alternatives/
 
 #fedora has own implemenation
 #FIXME should we remove this ?
@@ -216,7 +252,7 @@ create_logfile
 
 %files -f dpkg.lang
 %doc debian/changelog README AUTHORS THANKS TODO
-%doc doc/README.feature-removal-schedule debian/usertags debian/dpkg.cron.daily
+%doc debian/usertags debian/dpkg.cron.daily
 %license debian/copyright
 %dir %{pkgconfdir}
 %dir %{pkgconfdir}/dpkg.cfg.d
@@ -237,7 +273,7 @@ create_logfile
 %{pkgdatadir}/abitable
 %{pkgdatadir}/cputable
 %{pkgdatadir}/ostable
-%{pkgdatadir}/triplettable
+%{pkgdatadir}/tupletable
 %dir %{_localstatedir}/lib/dpkg/alternatives
 %dir %{_localstatedir}/lib/dpkg/info
 %dir %{_localstatedir}/lib/dpkg/parts
@@ -249,8 +285,8 @@ create_logfile
 %{_mandir}/man1/dpkg-split.1.gz
 %{_mandir}/man1/dpkg-trigger.1.gz
 %{_mandir}/man5/dpkg.cfg.5.gz
-%{_mandir}/man8/dpkg-divert.8.gz
-%{_mandir}/man8/dpkg-statoverride.8.gz
+%{_mandir}/man1/dpkg-divert.1.gz
+%{_mandir}/man1/dpkg-statoverride.1.gz
 %{_mandir}/man8/start-stop-daemon.8.gz
 %{_mandir}/*/man1/dpkg.1.gz
 %{_mandir}/*/man1/dpkg-deb.1.gz
@@ -259,8 +295,8 @@ create_logfile
 %{_mandir}/*/man1/dpkg-split.1.gz
 %{_mandir}/*/man1/dpkg-trigger.1.gz
 %{_mandir}/*/man5/dpkg.cfg.5.gz
-%{_mandir}/*/man8/dpkg-divert.8.gz
-%{_mandir}/*/man8/dpkg-statoverride.8.gz
+%{_mandir}/*/man1/dpkg-divert.1.gz
+%{_mandir}/*/man1/dpkg-statoverride.1.gz
 %{_mandir}/*/man8/start-stop-daemon.8.gz
 
 %files devel
@@ -269,14 +305,16 @@ create_logfile
 %{_includedir}/dpkg/*.h
 
 %files dev -f dpkg-dev.lang
-%doc AUTHORS THANKS debian/usertags doc/README.api doc/README.feature-removal-schedule doc/frontend.txt doc/triggers.txt
+%doc AUTHORS THANKS debian/usertags doc/README.api doc/frontend.txt doc/triggers.txt
 %config(noreplace) %{pkgconfdir}/shlibs.default
 %config(noreplace) %{pkgconfdir}/shlibs.override
+
 %{_bindir}/dpkg-architecture
 %{_bindir}/dpkg-buildpackage
 %{_bindir}/dpkg-buildflags
 %{_bindir}/dpkg-checkbuilddeps
 %{_bindir}/dpkg-distaddfile
+%{_bindir}/dpkg-genbuildinfo
 %{_bindir}/dpkg-genchanges
 %{_bindir}/dpkg-gencontrol
 %{_bindir}/dpkg-gensymbols
@@ -294,6 +332,7 @@ create_logfile
 %{_mandir}/man1/dpkg-buildpackage.1.gz
 %{_mandir}/man1/dpkg-checkbuilddeps.1.gz
 %{_mandir}/man1/dpkg-distaddfile.1.gz
+%{_mandir}/man1/dpkg-genbuildinfo.1.gz
 %{_mandir}/man1/dpkg-genchanges.1.gz
 %{_mandir}/man1/dpkg-gencontrol.1.gz
 %{_mandir}/man1/dpkg-gensymbols.1.gz
@@ -305,7 +344,12 @@ create_logfile
 %{_mandir}/man1/dpkg-shlibdeps.1.gz
 %{_mandir}/man1/dpkg-source.1.gz
 %{_mandir}/man1/dpkg-vendor.1.gz
+%{_mandir}/man5/deb-buildinfo.5.gz
+%{_mandir}/man5/deb-changelog.5.gz
+%{_mandir}/man5/deb-changes.5.gz
 %{_mandir}/man5/deb-control.5.gz
+%{_mandir}/man5/deb-conffiles.5.gz
+%{_mandir}/man5/deb-src-files.5.gz
 %{_mandir}/man5/deb-extra-override.5.gz
 %{_mandir}/man5/deb-old.5.gz
 %{_mandir}/man5/deb-origin.5.gz
@@ -315,14 +359,21 @@ create_logfile
 %{_mandir}/man5/deb-src-control.5.gz
 %{_mandir}/man5/deb-substvars.5.gz
 %{_mandir}/man5/deb-symbols.5.gz
+%{_mandir}/man5/deb-postinst.5.gz
+%{_mandir}/man5/deb-postrm.5.gz
+%{_mandir}/man5/deb-preinst.5.gz
+%{_mandir}/man5/deb-prerm.5.gz
 %{_mandir}/man5/deb-triggers.5.gz
 %{_mandir}/man5/deb-version.5.gz
 %{_mandir}/man5/deb.5.gz
+%{_mandir}/man5/deb822.5.gz
+%{_mandir}/man5/dsc.5.gz
 %{_mandir}/*/man1/dpkg-architecture.1.gz
 %{_mandir}/*/man1/dpkg-buildpackage.1.gz
 %{_mandir}/*/man1/dpkg-buildflags.1.gz
 %{_mandir}/*/man1/dpkg-checkbuilddeps.1.gz
 %{_mandir}/*/man1/dpkg-distaddfile.1.gz
+%{_mandir}/*/man1/dpkg-genbuildinfo.1.gz
 %{_mandir}/*/man1/dpkg-genchanges.1.gz
 %{_mandir}/*/man1/dpkg-gencontrol.1.gz
 %{_mandir}/*/man1/dpkg-gensymbols.1.gz
@@ -334,7 +385,12 @@ create_logfile
 %{_mandir}/*/man1/dpkg-shlibdeps.1.gz
 %{_mandir}/*/man1/dpkg-source.1.gz
 %{_mandir}/*/man1/dpkg-vendor.1.gz
+%{_mandir}/*/man5/deb-buildinfo.5.gz
+%{_mandir}/*/man5/deb-changelog.5.gz
+%{_mandir}/*/man5/deb-changes.5.gz
 %{_mandir}/*/man5/deb-control.5.gz
+%{_mandir}/*/man5/deb-conffiles.5.gz
+%{_mandir}/*/man5/deb-src-files.5.gz
 %{_mandir}/*/man5/deb-extra-override.5.gz
 %{_mandir}/*/man5/deb-old.5.gz
 %{_mandir}/*/man5/deb-origin.5.gz
@@ -344,21 +400,30 @@ create_logfile
 %{_mandir}/*/man5/deb-src-control.5.gz
 %{_mandir}/*/man5/deb-substvars.5.gz
 %{_mandir}/*/man5/deb-symbols.5.gz
+%{_mandir}/*/man5/deb-postinst.5.gz
+%{_mandir}/*/man5/deb-postrm.5.gz
+%{_mandir}/*/man5/deb-preinst.5.gz
+%{_mandir}/*/man5/deb-prerm.5.gz
 %{_mandir}/*/man5/deb-triggers.5.gz
 %{_mandir}/*/man5/deb-version.5.gz
 %{_mandir}/*/man5/deb.5.gz
+%{_mandir}/*/man5/deb822.5.gz
+%{_mandir}/*/man5/dsc.5.gz
+
 
 %files perl
 %{perl_vendorlib}/Dpkg*
 %{_mandir}/man3/Dpkg*.3*
-%{_libexecdir}/dpkg/parsechangelog
+#{_libexecdir}/dpkg/parsechangelog
+%{_datadir}/dpkg/*.specs
 
 
 %files -n dselect -f dselect.lang
-%doc dselect/methods/multicd/README.multicd dselect/methods/ftp/README.mirrors.txt
+%doc dselect/methods/multicd/README.multicd
 %config(noreplace) %{pkgconfdir}/dselect.cfg
 %{_bindir}/dselect
 %{perl_vendorlib}/Dselect
+%dir %{_libdir}/dpkg
 %{_libdir}/dpkg/methods
 %{_mandir}/man1/dselect.1.gz
 %{_mandir}/*/man1/dselect.1.gz
@@ -370,7 +435,8 @@ create_logfile
 
 %changelog
 * Sat Nov 26 2016 Sérgio Basto <sergio@serjux.com> - 1.18.15-1
-- New major release, 1.18.15
+- New major release, 1.18.15, adaptations based on files of debian directory in
+  debian package.
 
 * Fri Nov 25 2016 Sérgio Basto <sergio@serjux.com> - 1.17.27-1
 - New upstream vesion, 1.17.27, fixes CVE-2015-0860
