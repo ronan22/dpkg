@@ -2,7 +2,7 @@
 %global pkgdatadir      %{_datadir}/dpkg
 
 Name:           dpkg
-Version:        1.18.15
+Version:        1.18.22
 Release:        1%{?dist}
 Summary:        Package maintenance system for Debian Linux
 Group:          System Environment/Base
@@ -21,7 +21,7 @@ Patch2:         dpkg-perl-libexecdir.epel6.patch
 BuildRequires:  zlib-devel bzip2-devel libselinux-devel gettext ncurses-devel
 BuildRequires:  autoconf automake gettext-devel libtool
 BuildRequires:  doxygen flex xz-devel po4a
-%if 0%{?rhel} != 5 && 0%{?rhel} != 6
+%if 0%{?fedora} || 0%{?rhel} > 6
 BuildRequires:  dotconf-devel
 %endif
 # for /usr/bin/perl
@@ -144,7 +144,7 @@ Many users find dselect intimidating and new users may prefer to use apt-based u
 %setup -q
 #patch0 -p1
 %patch1 -p1
-%if 0%{?rhel} == 5 || 0%{?rhel} == 6
+%if 0%{?rhel} && 0%{?rhel} < 7
 %patch2 -p1
 %endif
 
@@ -159,7 +159,7 @@ EOF
 chmod +x %{__perl_requires}
 
 %build
-%if 0%{?rhel} != 5 && 0%{?rhel} != 6
+%if 0%{?fedora} || 0%{?rhel} > 6
 # We can't run autoreconf on epel <= 6 because needs gettext-0.18 when epel6
 # only have gettext-0.17:
 # autopoint: *** The AM_GNU_GETTEXT_VERSION declaration in your configure.ac
@@ -434,6 +434,9 @@ create_logfile
 
 
 %changelog
+* Sat Feb 04 2017 Sérgio Basto <sergio@serjux.com> - 1.18.22-1
+- Update dpkg to 1.18.22  (#1294258)
+
 * Sat Nov 26 2016 Sérgio Basto <sergio@serjux.com> - 1.18.15-1
 - New major release, 1.18.15, adaptations based on files of debian directory in
   debian package.
