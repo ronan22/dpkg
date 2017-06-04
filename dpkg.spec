@@ -3,7 +3,7 @@
 
 Name:           dpkg
 Version:        1.18.22
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        Package maintenance system for Debian Linux
 Group:          System Environment/Base
 # The entire source code is GPLv2+ with exception of the following
@@ -434,6 +434,9 @@ create_logfile
 
 
 %changelog
+* Sun Jun 04 2017 Jitka Plesnikova <jplesnik@redhat.com> - 1.18.22-3
+- Perl 5.26 rebuild
+
 * Fri Feb 10 2017 Fedora Release Engineering <releng@fedoraproject.org> - 1.18.22-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_26_Mass_Rebuild
 
