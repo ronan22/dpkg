@@ -2,8 +2,8 @@
 %global pkgdatadir      %{_datadir}/dpkg
 
 Name:           dpkg
-Version:        1.18.22
-Release:        3%{?dist}
+Version:        1.18.24
+Release:        1%{?dist}
 Summary:        Package maintenance system for Debian Linux
 Group:          System Environment/Base
 # The entire source code is GPLv2+ with exception of the following
@@ -221,9 +221,9 @@ rm -r %{buildroot}%{_sysconfdir}/alternatives/
 #FIXME should we remove this ?
 rm -rf %{buildroot}%{_sbindir}/install-info
 
-mkdir -p %{buildroot}%{_localstatedir}/lib/dpkg/alternatives %{buildroot}%{_localstatedir}/lib/dpkg/info \
- %{buildroot}%{_localstatedir}/lib/dpkg/parts %{buildroot}%{_localstatedir}/lib/dpkg/updates \
- %{buildroot}%{_localstatedir}/lib/dpkg/methods
+#mkdir -p %{buildroot}%{_localstatedir}/lib/dpkg/alternatives %{buildroot}%{_localstatedir}/lib/dpkg/info \
+# %{buildroot}%{_localstatedir}/lib/dpkg/parts %{buildroot}%{_localstatedir}/lib/dpkg/updates \
+# %{buildroot}%{_localstatedir}/lib/dpkg/methods
 
 
 %post
@@ -274,6 +274,7 @@ create_logfile
 %{pkgdatadir}/cputable
 %{pkgdatadir}/ostable
 %{pkgdatadir}/tupletable
+%dir %{_localstatedir}/lib/dpkg
 %dir %{_localstatedir}/lib/dpkg/alternatives
 %dir %{_localstatedir}/lib/dpkg/info
 %dir %{_localstatedir}/lib/dpkg/parts
@@ -423,17 +424,19 @@ create_logfile
 %config(noreplace) %{pkgconfdir}/dselect.cfg
 %{_bindir}/dselect
 %{perl_vendorlib}/Dselect
-%dir %{_libdir}/dpkg
-%{_libdir}/dpkg/methods
+%{_localstatedir}/lib/dpkg/methods
+%{_libexecdir}/dpkg/methods
 %{_mandir}/man1/dselect.1.gz
 %{_mandir}/*/man1/dselect.1.gz
 %{_mandir}/man5/dselect.cfg.5.gz
 %{_mandir}/*/man5/dselect.cfg.5.gz
 %dir %{pkgconfdir}/dselect.cfg.d
-%dir %{_localstatedir}/lib/dpkg/methods
 
 
 %changelog
+* Sun Jun 18 2017 Sérgio Basto <sergio@serjux.com> - 1.18.24-1
+- Update dpkg to 1.18.24
+
 * Sun Jun 04 2017 Jitka Plesnikova <jplesnik@redhat.com> - 1.18.22-3
 - Perl 5.26 rebuild
 
