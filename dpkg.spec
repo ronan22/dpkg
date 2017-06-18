@@ -28,6 +28,7 @@ BuildRequires:  dotconf-devel
 BuildRequires: perl
 BuildRequires: perl-devel
 BuildRequires: perl-generators
+BuildRequires: perl-Time-Piece
 # for /usr/bin/pod2man
 %if 0%{?fedora} > 18
 BuildRequires: perl-podlators
@@ -84,6 +85,7 @@ Group:   System Environment/Base
 Requires: dpkg = %{version}-%{release}
 Requires: perl(:MODULE_COMPAT_%(eval "`perl -V:version`"; echo $version))
 Requires: perl-TimeDate
+Requires: perl-Time-Piece
 BuildArch: noarch
 
 %description perl
@@ -415,7 +417,6 @@ create_logfile
 %files perl
 %{perl_vendorlib}/Dpkg*
 %{_mandir}/man3/Dpkg*.3*
-#{_libexecdir}/dpkg/parsechangelog
 %{_datadir}/dpkg/*.specs
 
 
