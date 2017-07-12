@@ -25,7 +25,7 @@ BuildRequires:  doxygen flex xz-devel po4a
 BuildRequires:  dotconf-devel
 %endif
 # for /usr/bin/perl
-BuildRequires: perl
+BuildRequires: perl-interpreter
 BuildRequires: perl-devel
 BuildRequires: perl-generators
 BuildRequires: perl-Time-Piece
