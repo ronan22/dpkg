@@ -139,8 +139,8 @@ Requires: perl(:MODULE_COMPAT_%(eval "`perl -V:version`"; echo $version))
 %description -n dselect
 dselect is a high-level interface for managing the installation and
 removal of Debian software packages.
-.
-Many users find dselect intimidating and new users may prefer to use apt-based user interfaces.
+Many users find dselect intimidating and new users may prefer to use apt-based
+user interfaces.
 
 %prep
 %setup -q
@@ -512,7 +512,7 @@ create_logfile
 * Tue Apr 21 2015 Sérgio Basto <sergio@serjux.com> - 1.16.16-2
 - Some fixes and added support for epel-6 .
 - Removed Patch0: dpkg-perl-libexecdir.patch .
-- move %{_libdir}/dpkg/parsechangelog to archable package .
+- move %%{_libdir}/dpkg/parsechangelog to archable package .
 
 * Sun Apr 19 2015 Sérgio Basto <sergio@serjux.com> - 1.16.16-1
 - Security update to 1.16.16
