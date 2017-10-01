@@ -3,7 +3,7 @@
 
 Name:           dpkg
 Version:        1.18.24
-Release:        3%{?dist}
+Release:        4%{?dist}
 Summary:        Package maintenance system for Debian Linux
 Group:          System Environment/Base
 # The entire source code is GPLv2+ with exception of the following
@@ -25,7 +25,12 @@ BuildRequires:  doxygen flex xz-devel po4a
 BuildRequires:  dotconf-devel
 %endif
 # for /usr/bin/perl
+%if 0%{?rhel} && 0%{?rhel} < 8
+BuildRequires: perl
+BuildRequires: perl-version
+%else
 BuildRequires: perl-interpreter
+%endif
 BuildRequires: perl-devel
 BuildRequires: perl-generators
 BuildRequires: perl-Time-Piece
@@ -435,6 +440,10 @@ create_logfile
 
 
 %changelog
+* Fri Aug 18 2017 Sérgio Basto <sergio@serjux.com> - 1.18.24-4
+- Fix minor rpmlint warnings
+- Make the dependency of perl-interpreter conditional
+
 * Wed Aug 02 2017 Fedora Release Engineering <releng@fedoraproject.org> - 1.18.24-3
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_27_Binutils_Mass_Rebuild
 
