@@ -15,7 +15,6 @@ Group:          System Environment/Base
 License:        GPLv2 and GPLv2+ and LGPLv2+ and Public Domain and BSD
 URL:            https://tracker.debian.org/pkg/dpkg
 Source0:        http://ftp.debian.org/debian/pool/main/d/dpkg/%{name}_%{version}.tar.xz
-Patch0:         dpkg-perl-libexecdir.patch
 Patch1:         dpkg-fix-logrotate.patch
 Patch2:         dpkg-perl-libexecdir.epel6.patch
 BuildRequires:  zlib-devel bzip2-devel libselinux-devel gettext ncurses-devel
@@ -149,12 +148,10 @@ user interfaces.
 
 %prep
 %setup -q
-#patch0 -p1
 %patch1 -p1
 %if 0%{?rhel} && 0%{?rhel} < 7
 %patch2 -p1
 %endif
-
 # Filter unwanted Requires:
 cat << \EOF > %{name}-req
 #!/bin/sh
@@ -164,6 +161,11 @@ EOF
 
 %define __perl_requires %{_builddir}/%{name}-%{version}/%{name}-req
 chmod +x %{__perl_requires}
+
+# https://bugzilla.redhat.com/show_bug.cgi?id=1510214
+# crapy /usr/lib/rpm/perl.req in EL7
+# mark string "use --format" as requires perl(--format)
+sed -i 's/^use --/may use --/' scripts/dpkg-source.pl
 
 %build
 %if 0%{?fedora} || 0%{?rhel} > 6
@@ -184,11 +186,11 @@ autoreconf
 
 # todo add this
 #--with-devlibdir=\$${prefix}/lib/$(DEB_HOST_MULTIARCH) \
-make %{?_smp_mflags}
+%make_build
 
 
 %install
-make install DESTDIR=%{buildroot}
+%make_install
 
 mkdir -p %{buildroot}/%{pkgconfdir}/origins
 
