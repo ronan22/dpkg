@@ -3,7 +3,7 @@
 
 Name:           dpkg
 Version:        1.18.24
-Release:        5%{?dist}
+Release:        6%{?dist}
 Summary:        Package maintenance system for Debian Linux
 Group:          System Environment/Base
 # The entire source code is GPLv2+ with exception of the following
@@ -442,6 +442,9 @@ create_logfile
 
 
 %changelog
+* Fri Feb 09 2018 Igor Gnatenko <ignatenkobrain@fedoraproject.org> - 1.18.24-6
+- Escape macros in %%changelog
+
 * Wed Feb 07 2018 Fedora Release Engineering <releng@fedoraproject.org> - 1.18.24-5
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_28_Mass_Rebuild
 
@@ -556,7 +559,7 @@ create_logfile
 
 * Mon Jul 01 2013 Sérgio Basto <sergio@serjux.com> - 1.16.10-6
 - add support to logrotate, by Oron Peled, rhbz #979378
-- added some new %doc and debian/copyright, by Oron Peled, rhbz #979378
+- added some new %%doc and debian/copyright, by Oron Peled, rhbz #979378
 - rpmlint cleanups, by Oron Peled, rhbz #979378 
 
 * Sun Jun 30 2013 Sérgio Basto <sergio@serjux.com> - 1.16.10-5
