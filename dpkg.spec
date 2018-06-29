@@ -3,7 +3,7 @@
 
 Name:           dpkg
 Version:        1.18.24
-Release:        6%{?dist}
+Release:        7%{?dist}
 Summary:        Package maintenance system for Debian Linux
 Group:          System Environment/Base
 # The entire source code is GPLv2+ with exception of the following
@@ -442,6 +442,9 @@ create_logfile
 
 
 %changelog
+* Fri Jun 29 2018 Jitka Plesnikova <jplesnik@redhat.com> - 1.18.24-7
+- Perl 5.28 rebuild
+
 * Fri Feb 09 2018 Igor Gnatenko <ignatenkobrain@fedoraproject.org> - 1.18.24-6
 - Escape macros in %%changelog
 
