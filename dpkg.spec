@@ -3,7 +3,7 @@
 
 Name:           dpkg
 Version:        1.18.24
-Release:        7%{?dist}
+Release:        8%{?dist}
 Summary:        Package maintenance system for Debian Linux
 Group:          System Environment/Base
 # The entire source code is GPLv2+ with exception of the following
@@ -442,6 +442,9 @@ create_logfile
 
 
 %changelog
+* Thu Jul 12 2018 Fedora Release Engineering <releng@fedoraproject.org> - 1.18.24-8
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_29_Mass_Rebuild
+
 * Fri Jun 29 2018 Jitka Plesnikova <jplesnik@redhat.com> - 1.18.24-7
 - Perl 5.28 rebuild
 
