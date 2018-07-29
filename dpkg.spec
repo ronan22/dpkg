@@ -3,7 +3,7 @@
 
 Name:           dpkg
 Version:        1.18.24
-Release:        8%{?dist}
+Release:        9%{?dist}
 Summary:        Package maintenance system for Debian Linux
 Group:          System Environment/Base
 # The entire source code is GPLv2+ with exception of the following
@@ -38,6 +38,7 @@ BuildRequires: perl-Time-Piece
 %if 0%{?fedora} > 18
 BuildRequires: perl-podlators
 %endif
+Requires(post): coreutils
 
 %description
 This package provides the low-level infrastructure for handling the
@@ -443,6 +444,9 @@ create_logfile
 
 
 %changelog
+* Sun Jul 29 2018 Sérgio Basto <sergio@serjux.com> - 1.18.24-9
+- Requires(post): coreutils (#1598872)
+
 * Thu Jul 12 2018 Fedora Release Engineering <releng@fedoraproject.org> - 1.18.24-8
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_29_Mass_Rebuild
 - https://fedoraproject.org/wiki/Changes/Remove_GCC_from_BuildRoot
