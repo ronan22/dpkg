@@ -40,6 +40,11 @@ BuildRequires: perl-podlators
 %endif
 Requires(post): coreutils
 
+#https://bugzilla.redhat.com/show_bug.cgi?id=1497544#c5
+%if 0%{?rhel}
+ExcludeArch: ppc64
+%endif
+
 %description
 This package provides the low-level infrastructure for handling the
 installation and removal of Debian software packages.
