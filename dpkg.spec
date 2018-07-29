@@ -2,8 +2,8 @@
 %global pkgdatadir      %{_datadir}/dpkg
 
 Name:           dpkg
-Version:        1.18.24
-Release:        9%{?dist}
+Version:        1.18.25
+Release:        1%{?dist}
 Summary:        Package maintenance system for Debian Linux
 Group:          System Environment/Base
 # The entire source code is GPLv2+ with exception of the following
@@ -17,6 +17,7 @@ URL:            https://tracker.debian.org/pkg/dpkg
 Source0:        http://ftp.debian.org/debian/pool/main/d/dpkg/%{name}_%{version}.tar.xz
 Patch1:         dpkg-fix-logrotate.patch
 Patch2:         dpkg-perl-libexecdir.epel6.patch
+
 BuildRequires:  gcc-c++
 BuildRequires:  zlib-devel bzip2-devel libselinux-devel gettext ncurses-devel
 BuildRequires:  autoconf automake gettext-devel libtool
@@ -159,6 +160,7 @@ user interfaces.
 %if 0%{?rhel} && 0%{?rhel} < 7
 %patch2 -p1
 %endif
+
 # Filter unwanted Requires:
 cat << \EOF > %{name}-req
 #!/bin/sh
@@ -449,6 +451,10 @@ create_logfile
 
 
 %changelog
+* Sun Jul 29 2018 Sérgio Basto <sergio@serjux.com> - 1.18.25-1
+- Update dpkg to 1.18.25
+- Security fix: directory traversal via /DEBIAN symlink
+
 * Sun Jul 29 2018 Sérgio Basto <sergio@serjux.com> - 1.18.24-9
 - Requires(post): coreutils (#1598872)
 
