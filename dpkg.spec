@@ -3,7 +3,7 @@
 
 Name:           dpkg
 Version:        1.18.25
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Package maintenance system for Debian Linux
 Group:          System Environment/Base
 # The entire source code is GPLv2+ with exception of the following
@@ -451,6 +451,9 @@ create_logfile
 
 
 %changelog
+* Tue Jul 31 2018 Florian Weimer <fweimer@redhat.com> - 1.18.25-2
+- Rebuild with fixed binutils
+
 * Sun Jul 29 2018 Sérgio Basto <sergio@serjux.com> - 1.18.25-1
 - Update dpkg to 1.18.25
 - Security fix: directory traversal via /DEBIAN symlink
