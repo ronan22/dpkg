@@ -11,7 +11,7 @@
 
 Name:           dpkg
 Version:        1.18.25
-Release:        3%{?dist}
+Release:        4%{?dist}
 Summary:        Package maintenance system for Debian Linux
 Group:          System Environment/Base
 # The entire source code is GPLv2+ with exception of the following
@@ -289,6 +289,14 @@ rm -rf %{buildroot}%{_sbindir}/install-info
 # %{buildroot}%{_localstatedir}/lib/dpkg/parts %{buildroot}%{_localstatedir}/lib/dpkg/updates \
 # %{buildroot}%{_localstatedir}/lib/dpkg/methods
 
+%if 0%{?rhel}
+# https://www.spinics.net/linux/fedora/epel-devel/msg02029.html
+# avoid conflicts files with man-pages (who cares about it and pl man pages ?)
+rm -rf %{buildroot}%{_mandir}/it/man1/
+rm -rf %{buildroot}%{_mandir}/it/man5/
+rm -rf %{buildroot}%{_mandir}/pl/man1/
+%endif
+
 
 %post
 # from dpkg.postinst
@@ -501,6 +509,9 @@ create_logfile
 
 
 %changelog
+* Sun Sep 16 2018 Sérgio Basto <sergio@serjux.com> - 1.18.25-4
+- Fix conflicts with man pages on el
+
 * Sat Sep  8 2018 Robin Lee <cheeselee@fedoraproject.org> - 1.18.25-3
 - Bundle a version of tar to make it compatible in EL7 (BZ#1626465)
 
