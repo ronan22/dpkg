@@ -1,17 +1,9 @@
 %global pkgconfdir      %{_sysconfdir}/dpkg
 %global pkgdatadir      %{_datadir}/dpkg
-%global tar_version 1.30
-%if 0%{?rhel} && 0%{?rhel} < 8
-# This version of dpkg requires tar >= 1.28, but the current version that available in
-# el7 is 1.26. So we have to bundle a build of a newer version.
-%global bundle_tar 1
-%else
-%global bundle_tar 0
-%endif
 
 Name:           dpkg
 Version:        1.18.25
-Release:        4%{?dist}
+Release:        5%{?dist}
 Summary:        Package maintenance system for Debian Linux
 Group:          System Environment/Base
 # The entire source code is GPLv2+ with exception of the following
@@ -25,14 +17,12 @@ URL:            https://tracker.debian.org/pkg/dpkg
 Source0:        http://ftp.debian.org/debian/pool/main/d/dpkg/%{name}_%{version}.tar.xz
 Patch1:         dpkg-fix-logrotate.patch
 Patch2:         dpkg-perl-libexecdir.epel6.patch
-Source1:        ftp://ftp.gnu.org/pub/gnu/tar/tar-%{tar_version}.tar.xz
 
 BuildRequires:  gcc-c++
 BuildRequires:  zlib-devel bzip2-devel libselinux-devel gettext ncurses-devel
 BuildRequires:  autoconf automake gettext-devel libtool
 BuildRequires:  doxygen flex xz-devel
 BuildRequires:  po4a >= 0.43
-BuildRequires:  perl(Digest)
 %if 0%{?fedora} || 0%{?rhel} > 6
 BuildRequires:  dotconf-devel
 %endif
@@ -46,18 +36,13 @@ BuildRequires: perl-interpreter
 BuildRequires: perl-devel
 BuildRequires: perl-generators
 BuildRequires: perl-Time-Piece
+BuildRequires: perl(Digest)
 # for /usr/bin/pod2man
 %if 0%{?fedora} > 18
 BuildRequires: perl-podlators
 %endif
-%if %bundle_tar
-BuildRequires: libacl-devel
-Provides:      bundled(tar) = %{tar_version}
-Provides:      bundled(gnulib)
-%else
 # Needed for --clamp-mtime in dpkg-source -b.
-Requires:      tar >= 2:1.28
-%endif
+#Requires:      tar >= 2:1.28
 
 Requires(post): coreutils
 
@@ -196,24 +181,7 @@ chmod +x %{__perl_requires}
 # mark string "use --format" as requires perl(--format)
 sed -i 's/^use --/may use --/' scripts/dpkg-source.pl
 
-%if %bundle_tar
-tar Jfx %{SOURCE1}
-%endif
-
 %build
-%if %bundle_tar
-pushd tar-%{tar_version}
-autoreconf -v
-# follow config options of standard tar except NLS
-%configure \
-    %{!?with_selinux:--without-selinux} \
-    --with-lzma="xz --format=lzma" \
-    --disable-nls \
-    DEFAULT_RMT_DIR=%{_sysconfdir} \
-    RSH=/usr/bin/ssh
-%make_build
-popd
-%endif
 %if 0%{?fedora} || 0%{?rhel} > 6
 # We can't run autoreconf on epel <= 6 because needs gettext-0.18 when epel6
 # only have gettext-0.17:
@@ -230,21 +198,12 @@ autoreconf
         --with-liblzma \
         --with-libbz2
 
-%if %bundle_tar
-echo '#define TAR "%{_libexecdir}/%{name}/tar"' > override_tar.h
-echo '#include "override_tar.h"' >> config.h.in
-%endif
 # todo add this
 #--with-devlibdir=\$${prefix}/lib/$(DEB_HOST_MULTIARCH) \
 %make_build
 
 
 %install
-%if %bundle_tar
-pushd tar-%{tar_version}
-install -m 755 -D src/tar %{buildroot}/%{_libexecdir}/%{name}/tar
-popd
-%endif
 %make_install
 
 mkdir -p %{buildroot}/%{pkgconfdir}/origins
@@ -341,10 +300,6 @@ create_logfile
 %{_bindir}/dpkg-divert
 %{_bindir}/dpkg-statoverride
 %{_sbindir}/start-stop-daemon
-%dir %{_libexecdir}/%{name}
-%if %bundle_tar
-%{_libexecdir}/%{name}/tar
-%endif
 %dir %{pkgdatadir}
 %{pkgdatadir}/abitable
 %{pkgdatadir}/cputable
@@ -509,6 +464,10 @@ create_logfile
 
 
 %changelog
+* Sun Sep 23 2018 Sérgio Basto <sergio@serjux.com> - 1.18.25-5
+- Revert "Bundle a version of tar to make it compatible in EL7"
+- Keep BR: perl(Digest)
+
 * Sun Sep 16 2018 Sérgio Basto <sergio@serjux.com> - 1.18.25-4
 - Fix conflicts with man pages on el
 
