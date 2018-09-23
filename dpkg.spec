@@ -104,6 +104,10 @@ Requires: dpkg = %{version}-%{release}
 Requires: perl(:MODULE_COMPAT_%(eval "`perl -V:version`"; echo $version))
 Requires: perl-TimeDate
 Requires: perl-Time-Piece
+Requires: perl(Digest::MD5)
+Requires: perl(Digest::SHA)
+Requires: perl(Digest::SHA1)
+Requires: perl(Digest::SHA3)
 BuildArch: noarch
 
 %description perl
@@ -473,6 +477,7 @@ create_logfile
 - Revert "Bundle a version of tar to make it compatible in EL7"
 - Keep BR: perl(Digest)
 - Remove --clamp-mtime option on tar of el7.
+- Add Requires perl(Digest::MD5) and perl(Digest::SHA*) on dpkg-perl (#1628409)
 
 * Sun Sep 16 2018 Sérgio Basto <sergio@serjux.com> - 1.18.25-4
 - Fix conflicts with man pages on el
