@@ -17,6 +17,7 @@ URL:            https://tracker.debian.org/pkg/dpkg
 Source0:        http://ftp.debian.org/debian/pool/main/d/dpkg/%{name}_%{version}.tar.xz
 Patch1:         dpkg-fix-logrotate.patch
 Patch2:         dpkg-perl-libexecdir.epel6.patch
+Patch3:         dpkg-clamp-mtime.patch
 
 BuildRequires:  gcc-c++
 BuildRequires:  zlib-devel bzip2-devel libselinux-devel gettext ncurses-devel
@@ -165,6 +166,10 @@ user interfaces.
 %if 0%{?rhel} && 0%{?rhel} < 7
 %patch2 -p1
 %endif
+%if 0%{?rhel} && 0%{?rhel} < 8
+%patch3 -p1
+%endif
+
 
 # Filter unwanted Requires:
 cat << \EOF > %{name}-req
@@ -467,6 +472,7 @@ create_logfile
 * Sun Sep 23 2018 Sérgio Basto <sergio@serjux.com> - 1.18.25-5
 - Revert "Bundle a version of tar to make it compatible in EL7"
 - Keep BR: perl(Digest)
+- Remove --clamp-mtime option on tar of el7.
 
 * Sun Sep 16 2018 Sérgio Basto <sergio@serjux.com> - 1.18.25-4
 - Fix conflicts with man pages on el
