@@ -3,7 +3,7 @@
 
 Name:           dpkg
 Version:        1.18.25
-Release:        5%{?dist}
+Release:        6%{?dist}
 Summary:        Package maintenance system for Debian Linux
 Group:          System Environment/Base
 # The entire source code is GPLv2+ with exception of the following
@@ -47,10 +47,6 @@ BuildRequires: perl-podlators
 
 Requires(post): coreutils
 
-#https://bugzilla.redhat.com/show_bug.cgi?id=1497544#c5
-%if 0%{?rhel}
-ExcludeArch: ppc64
-%endif
 
 %description
 This package provides the low-level infrastructure for handling the
@@ -473,6 +469,9 @@ create_logfile
 
 
 %changelog
+* Wed Jan 23 2019 Sérgio Basto <sergio@serjux.com> - 1.18.25-6
+- po4a is now available on ppc64 and we can build dpkg there
+
 * Sun Sep 23 2018 Sérgio Basto <sergio@serjux.com> - 1.18.25-5
 - Revert "Bundle a version of tar to make it compatible in EL7"
 - Keep BR: perl(Digest)
