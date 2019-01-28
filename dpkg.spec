@@ -5,7 +5,6 @@ Name:           dpkg
 Version:        1.18.25
 Release:        6%{?dist}
 Summary:        Package maintenance system for Debian Linux
-Group:          System Environment/Base
 # The entire source code is GPLv2+ with exception of the following
 # lib/dpkg/md5.c, lib/dpkg/md5.h - Public domain
 # lib/dpkg/showpkg.c, dselect/methods/multicd, lib/dpkg/utils.c, lib/dpkg/showpkg.c - GPLv2
@@ -67,7 +66,6 @@ because packages dependencies will likely be unmet.
 
 %package devel
 Summary: Debian package management static library
-Group:    Development/System
 Provides: dpkg-static = %{version}-%{release}
 
 %description devel
@@ -80,7 +78,6 @@ at any time, use at your own risk.
 
 %package dev
 Summary:  Debian package development tools
-Group:    Development/System
 Requires: dpkg-perl = %{version}-%{release}
 Requires: patch, make, binutils, bzip2, lzma, xz
 Obsoletes: dpkg-devel < 1.16
@@ -95,7 +92,6 @@ for example, most packages need make and the C compiler gcc.
 
 %package perl
 Summary: Dpkg perl modules
-Group:   System Environment/Base
 Requires: dpkg = %{version}-%{release}
 Requires: perl(:MODULE_COMPAT_%(eval "`perl -V:version`"; echo $version))
 Requires: perl-TimeDate
@@ -150,7 +146,6 @@ modules.
 
 %package -n dselect
 Summary:  Debian package management front-end
-Group:    System Environment/Base
 Requires: %{name} = %{version}-%{release}
 Requires: perl(:MODULE_COMPAT_%(eval "`perl -V:version`"; echo $version))
 
