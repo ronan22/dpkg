@@ -3,7 +3,7 @@
 
 Name:           dpkg
 Version:        1.18.25
-Release:        7%{?dist}
+Release:        8%{?dist}
 Summary:        Package maintenance system for Debian Linux
 # The entire source code is GPLv2+ with exception of the following
 # lib/dpkg/md5.c, lib/dpkg/md5.h - Public domain
@@ -43,6 +43,12 @@ BuildRequires: perl-podlators
 %endif
 # Needed for --clamp-mtime in dpkg-source -b.
 #Requires:      tar >= 2:1.28
+# Need by make check
+BuildRequires: perl(Test::More)
+BuildRequires: perl(IPC::Cmd)
+BuildRequires: perl(Digest::SHA)
+BuildRequires: perl(IO::String)
+BuildRequires: fakeroot
 
 Requires(post): coreutils
 
@@ -79,7 +85,13 @@ at any time, use at your own risk.
 %package dev
 Summary:  Debian package development tools
 Requires: dpkg-perl = %{version}-%{release}
-Requires: patch, make, binutils, bzip2, lzma, xz
+Requires: patch
+Requires: make
+Requires: binutils
+Requires: bzip2
+Requires: lzma
+Requires: xz
+Requires: perl(MIME::Lite)
 Obsoletes: dpkg-devel < 1.16
 BuildArch: noarch
 
@@ -255,6 +267,10 @@ rm -rf %{buildroot}%{_mandir}/it/man1/
 rm -rf %{buildroot}%{_mandir}/it/man5/
 rm -rf %{buildroot}%{_mandir}/pl/man1/
 %endif
+
+%check
+make VERBOSE=1 TESTSUITEFLAGS=--verbose \
+    TEST_PARALLEL=4 check || :
 
 
 %post
@@ -464,6 +480,10 @@ create_logfile
 
 
 %changelog
+* Thu Feb 28 2019 Sérgio Basto <sergio@serjux.com> - 1.18.25-8
+- Requires perl(MIME::Lite) on dpkg-dev (rhbz #1678637)
+- Adds check section and performs unit tests but ignores failures
+
 * Thu Jan 31 2019 Fedora Release Engineering <releng@fedoraproject.org> - 1.18.25-7
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_30_Mass_Rebuild
 
