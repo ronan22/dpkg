@@ -3,7 +3,7 @@
 
 Name:           dpkg
 Version:        1.18.25
-Release:        9%{?dist}
+Release:        10%{?dist}
 Summary:        Package maintenance system for Debian Linux
 # The entire source code is GPLv2+ with exception of the following
 # lib/dpkg/md5.c, lib/dpkg/md5.h - Public domain
@@ -480,6 +480,9 @@ create_logfile
 
 
 %changelog
+* Wed Jul 24 2019 Fedora Release Engineering <releng@fedoraproject.org> - 1.18.25-10
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_31_Mass_Rebuild
+
 * Sat Jun 01 2019 Jitka Plesnikova <jplesnik@redhat.com> - 1.18.25-9
 - Perl 5.30 rebuild
 
