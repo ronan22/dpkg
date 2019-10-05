@@ -3,7 +3,7 @@
 
 Name:           dpkg
 Version:        1.18.25
-Release:        10%{?dist}
+Release:        11%{?dist}
 Summary:        Package maintenance system for Debian Linux
 # The entire source code is GPLv2+ with exception of the following
 # lib/dpkg/md5.c, lib/dpkg/md5.h - Public domain
@@ -111,7 +111,6 @@ Requires: perl-Time-Piece
 Requires: perl(Digest::MD5)
 Requires: perl(Digest::SHA)
 Requires: perl(Digest::SHA1)
-Requires: perl(Digest::SHA3)
 BuildArch: noarch
 
 %description perl
@@ -480,6 +479,9 @@ create_logfile
 
 
 %changelog
+* Sat Oct 05 2019 Sérgio Basto <sergio@serjux.com> - 1.18.25-11
+- Fix #1758136 related with #1628409 (dpkg-perl only needs MD5, SHA1 and SHA256)
+
 * Wed Jul 24 2019 Fedora Release Engineering <releng@fedoraproject.org> - 1.18.25-10
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_31_Mass_Rebuild
 
