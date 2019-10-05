@@ -3,7 +3,7 @@
 
 Name:           dpkg
 Version:        1.18.25
-Release:        11%{?dist}
+Release:        12%{?dist}
 Summary:        Package maintenance system for Debian Linux
 # The entire source code is GPLv2+ with exception of the following
 # lib/dpkg/md5.c, lib/dpkg/md5.h - Public domain
@@ -480,6 +480,9 @@ create_logfile
 
 
 %changelog
+* Sat Oct 05 2019 Sérgio Basto <sergio@serjux.com> - 1.18.25-12
+- BR: perl(Digest::MD5) need by make check
+
 * Sat Oct 05 2019 Sérgio Basto <sergio@serjux.com> - 1.18.25-11
 - Fix #1758136 related with #1628409 (dpkg-perl only needs MD5, SHA1 and SHA256)
 
