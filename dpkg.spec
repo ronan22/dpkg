@@ -48,6 +48,7 @@ BuildRequires: perl(Test::More)
 BuildRequires: perl(IPC::Cmd)
 BuildRequires: perl(Digest::SHA)
 BuildRequires: perl(IO::String)
+BuildRequires: perl(Digest::MD5)
 BuildRequires: fakeroot
 
 Requires(post): coreutils
