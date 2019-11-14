@@ -2,8 +2,8 @@
 %global pkgdatadir      %{_datadir}/dpkg
 
 Name:           dpkg
-Version:        1.18.25
-Release:        10%{?dist}
+Version:        1.19.7
+Release:        1%{?dist}
 Summary:        Package maintenance system for Debian Linux
 # The entire source code is GPLv2+ with exception of the following
 # lib/dpkg/md5.c, lib/dpkg/md5.h - Public domain
@@ -14,9 +14,6 @@ Summary:        Package maintenance system for Debian Linux
 License:        GPLv2 and GPLv2+ and LGPLv2+ and Public Domain and BSD
 URL:            https://tracker.debian.org/pkg/dpkg
 Source0:        http://ftp.debian.org/debian/pool/main/d/dpkg/%{name}_%{version}.tar.xz
-Patch1:         dpkg-fix-logrotate.patch
-Patch2:         dpkg-perl-libexecdir.epel6.patch
-Patch3:         dpkg-clamp-mtime.patch
 
 BuildRequires:  gcc-c++
 BuildRequires:  zlib-devel bzip2-devel libselinux-devel gettext ncurses-devel
@@ -169,14 +166,6 @@ user interfaces.
 
 %prep
 %setup -q
-%patch1 -p1
-%if 0%{?rhel} && 0%{?rhel} < 7
-%patch2 -p1
-%endif
-%if 0%{?rhel} && 0%{?rhel} < 8
-%patch3 -p1
-%endif
-
 
 # Filter unwanted Requires:
 cat << \EOF > %{name}-req
@@ -185,13 +174,8 @@ cat << \EOF > %{name}-req
   sed -e '/perl(Dselect::Ftp)/d' -e '/perl(extra)/d' -e '/perl(file)/d' -e '/perl(dpkg-gettext.pl)/d' -e '/perl(controllib.pl)/d' -e '/perl(in)/d'
 EOF
 
-%define __perl_requires %{_builddir}/%{name}-%{version}/%{name}-req
-chmod +x %{__perl_requires}
-
-# https://bugzilla.redhat.com/show_bug.cgi?id=1510214
-# crapy /usr/lib/rpm/perl.req in EL7
-# mark string "use --format" as requires perl(--format)
-sed -i 's/^use --/may use --/' scripts/dpkg-source.pl
+#define __perl_requires %{_builddir}/%{name}-%{version}/%{name}-req
+#chmod +x %{__perl_requires}
 
 %build
 %if 0%{?fedora} || 0%{?rhel} > 6
@@ -336,6 +320,8 @@ create_logfile
 %{_mandir}/man1/dpkg-divert.1.gz
 %{_mandir}/man1/dpkg-statoverride.1.gz
 %{_mandir}/man8/start-stop-daemon.8.gz
+%{_mandir}/man5/deb-src-rules.5.gz
+%{_mandir}/man7/deb-version.7.gz
 %{_mandir}/*/man1/dpkg.1.gz
 %{_mandir}/*/man1/dpkg-deb.1.gz
 %{_mandir}/*/man1/dpkg-maintscript-helper.1.gz
@@ -346,6 +332,10 @@ create_logfile
 %{_mandir}/*/man1/dpkg-divert.1.gz
 %{_mandir}/*/man1/dpkg-statoverride.1.gz
 %{_mandir}/*/man8/start-stop-daemon.8.gz
+%{_mandir}/*/man5/deb-src-rules.5.gz
+%{_mandir}/*/man7/deb-version.7.gz
+%{_datadir}/polkit-1/actions/org.dpkg.pkexec.update-alternatives.policy
+
 
 %files devel
 %{_libdir}/libdpkg.a
@@ -412,7 +402,7 @@ create_logfile
 %{_mandir}/man5/deb-preinst.5.gz
 %{_mandir}/man5/deb-prerm.5.gz
 %{_mandir}/man5/deb-triggers.5.gz
-%{_mandir}/man5/deb-version.5.gz
+#{_mandir}/man5/deb-version.5.gz
 %{_mandir}/man5/deb.5.gz
 %{_mandir}/man5/deb822.5.gz
 %{_mandir}/man5/dsc.5.gz
@@ -453,7 +443,7 @@ create_logfile
 %{_mandir}/*/man5/deb-preinst.5.gz
 %{_mandir}/*/man5/deb-prerm.5.gz
 %{_mandir}/*/man5/deb-triggers.5.gz
-%{_mandir}/*/man5/deb-version.5.gz
+#{_mandir}/*/man5/deb-version.5.gz
 %{_mandir}/*/man5/deb.5.gz
 %{_mandir}/*/man5/deb822.5.gz
 %{_mandir}/*/man5/dsc.5.gz
@@ -466,7 +456,7 @@ create_logfile
 
 
 %files -n dselect -f dselect.lang
-%doc dselect/methods/multicd/README.multicd
+#doc dselect/methods/multicd/README.multicd
 %config(noreplace) %{pkgconfdir}/dselect.cfg
 %{_bindir}/dselect
 %{perl_vendorlib}/Dselect
@@ -480,6 +470,14 @@ create_logfile
 
 
 %changelog
+* Thu Nov 14 2019 Sérgio Basto <sergio@serjux.com> - 1.19.7-1
+- Upgrade dpkg to 1.19.x 1.19.7
+- Won't be possible build on el7
+- Remove hacks for tar <= 1.28 on el7 (patch 3)
+- Remove hacks buil on el6 (patch 2)
+- Remove hack for crapy /usr/lib/rpm/perl.req in EL7 (#1510214)
+- Disable our custom dpkg-req
+
 * Wed Jul 24 2019 Fedora Release Engineering <releng@fedoraproject.org> - 1.18.25-10
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_31_Mass_Rebuild
 
