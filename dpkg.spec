@@ -3,7 +3,7 @@
 
 Name:           dpkg
 Version:        1.19.7
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Package maintenance system for Debian Linux
 # The entire source code is GPLv2+ with exception of the following
 # lib/dpkg/md5.c, lib/dpkg/md5.h - Public domain
@@ -174,18 +174,11 @@ cat << \EOF > %{name}-req
   sed -e '/perl(Dselect::Ftp)/d' -e '/perl(extra)/d' -e '/perl(file)/d' -e '/perl(dpkg-gettext.pl)/d' -e '/perl(controllib.pl)/d' -e '/perl(in)/d'
 EOF
 
-#define __perl_requires %{_builddir}/%{name}-%{version}/%{name}-req
-#chmod +x %{__perl_requires}
+%define __perl_requires %{_builddir}/%{name}-%{version}/%{name}-req
+chmod +x %{__perl_requires}
 
 %build
-%if 0%{?fedora} || 0%{?rhel} > 6
-# We can't run autoreconf on epel <= 6 because needs gettext-0.18 when epel6
-# only have gettext-0.17:
-# autopoint: *** The AM_GNU_GETTEXT_VERSION declaration in your configure.ac
-# file requires the infrastructure from gettext-0.18 but this version
-# is older. Please upgrade to gettext-0.18 or newer.
 autoreconf
-%endif
 %configure --disable-linker-optimisations \
         --with-admindir=%{_localstatedir}/lib/dpkg \
         --with-libselinux \
@@ -470,6 +463,10 @@ create_logfile
 
 
 %changelog
+* Thu Nov 14 2019 Sérgio Basto <sergio@serjux.com> - 1.19.7-2
+- Enable custom perl_requires
+- More clean up of el6 builds
+
 * Thu Nov 14 2019 Sérgio Basto <sergio@serjux.com> - 1.19.7-1
 - Upgrade dpkg to 1.19.x 1.19.7
 - Won't be possible build on el7
