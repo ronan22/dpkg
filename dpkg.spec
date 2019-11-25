@@ -3,7 +3,7 @@
 
 Name:           dpkg
 Version:        1.19.7
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        Package maintenance system for Debian Linux
 # The entire source code is GPLv2+ with exception of the following
 # lib/dpkg/md5.c, lib/dpkg/md5.h - Public domain
@@ -20,26 +20,17 @@ BuildRequires:  zlib-devel bzip2-devel libselinux-devel gettext ncurses-devel
 BuildRequires:  autoconf automake gettext-devel libtool
 BuildRequires:  doxygen flex xz-devel
 BuildRequires:  po4a >= 0.43
-%if 0%{?fedora} || 0%{?rhel} > 6
 BuildRequires:  dotconf-devel
-%endif
 # for /usr/bin/perl
-%if 0%{?rhel} && 0%{?rhel} < 8
-BuildRequires: perl
-BuildRequires: perl-version
-%else
 BuildRequires: perl-interpreter
-%endif
 BuildRequires: perl-devel
 BuildRequires: perl-generators
 BuildRequires: perl-Time-Piece
 BuildRequires: perl(Digest)
 # for /usr/bin/pod2man
-%if 0%{?fedora} > 18
 BuildRequires: perl-podlators
-%endif
 # Needed for --clamp-mtime in dpkg-source -b.
-#Requires:      tar >= 2:1.28
+Requires:      tar >= 2:1.28
 # Need by make check
 BuildRequires: perl(Test::More)
 BuildRequires: perl(IPC::Cmd)
@@ -463,6 +454,9 @@ create_logfile
 
 
 %changelog
+* Mon Nov 25 2019 Sérgio Basto <sergio@serjux.com> - 1.19.7-3
+- More cleanings
+
 * Thu Nov 14 2019 Sérgio Basto <sergio@serjux.com> - 1.19.7-2
 - Enable custom perl_requires
 - More clean up of el6 builds
