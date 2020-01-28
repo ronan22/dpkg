@@ -3,7 +3,7 @@
 
 Name:           dpkg
 Version:        1.19.7
-Release:        3%{?dist}
+Release:        4%{?dist}
 Summary:        Package maintenance system for Debian Linux
 # The entire source code is GPLv2+ with exception of the following
 # lib/dpkg/md5.c, lib/dpkg/md5.h - Public domain
@@ -454,6 +454,9 @@ create_logfile
 
 
 %changelog
+* Tue Jan 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 1.19.7-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild
+
 * Mon Nov 25 2019 Sérgio Basto <sergio@serjux.com> - 1.19.7-3
 - More cleanings
 
