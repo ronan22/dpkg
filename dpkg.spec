@@ -3,7 +3,7 @@
 
 Name:           dpkg
 Version:        1.19.7
-Release:        4%{?dist}
+Release:        5%{?dist}
 Summary:        Package maintenance system for Debian Linux
 # The entire source code is GPLv2+ with exception of the following
 # lib/dpkg/md5.c, lib/dpkg/md5.h - Public domain
@@ -34,6 +34,7 @@ Requires:      tar >= 2:1.28
 # Need by make check
 BuildRequires: perl(Test::More)
 BuildRequires: perl(IPC::Cmd)
+BuildRequires: perl(Digest::MD5)
 BuildRequires: perl(Digest::SHA)
 BuildRequires: perl(IO::String)
 BuildRequires: fakeroot
@@ -99,7 +100,6 @@ Requires: perl-Time-Piece
 Requires: perl(Digest::MD5)
 Requires: perl(Digest::SHA)
 Requires: perl(Digest::SHA1)
-Requires: perl(Digest::SHA3)
 BuildArch: noarch
 
 %description perl
@@ -454,6 +454,11 @@ create_logfile
 
 
 %changelog
+* Tue Feb 18 2020 Sérgio Basto <sergio@serjux.com> - 1.19.7-5
+- Drop Requires:perl-Digest-SHA3, dpkg-perl only needs MD5, SHA1 and SHA256
+  (#1758136) related with (#1628409)
+- BR: perl(Digest::MD5) need by make check
+
 * Tue Jan 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 1.19.7-4
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild
 
