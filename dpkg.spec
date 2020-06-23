@@ -3,7 +3,7 @@
 
 Name:           dpkg
 Version:        1.19.7
-Release:        5%{?dist}
+Release:        6%{?dist}
 Summary:        Package maintenance system for Debian Linux
 # The entire source code is GPLv2+ with exception of the following
 # lib/dpkg/md5.c, lib/dpkg/md5.h - Public domain
@@ -454,6 +454,9 @@ create_logfile
 
 
 %changelog
+* Tue Jun 23 2020 Jitka Plesnikova <jplesnik@redhat.com> - 1.19.7-6
+- Perl 5.32 rebuild
+
 * Tue Feb 18 2020 Sérgio Basto <sergio@serjux.com> - 1.19.7-5
 - Drop Requires:perl-Digest-SHA3, dpkg-perl only needs MD5, SHA1 and SHA256
   (#1758136) related with (#1628409)
