@@ -38,6 +38,7 @@ BuildRequires: perl(Digest::MD5)
 BuildRequires: perl(Digest::SHA)
 BuildRequires: perl(IO::String)
 BuildRequires: fakeroot
+BuildRequires: make
 
 Requires(post): coreutils
 
