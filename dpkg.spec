@@ -17,7 +17,7 @@ Source0:        http://ftp.debian.org/debian/pool/main/d/dpkg/%{name}_%{version}
 # https://lists.debian.org/debian-dpkg/2017/08/msg00002.html
 # The problem is that your compiler gives a different triplet than the
 # one used by dpkg itself
-# Finally trying correct triplet for Fedora
+# Finally trying to correct triplet for Fedora
 Patch1:         cputable_ppc64le.patch
 Patch2:         ostable_armv7hl.patch
 
