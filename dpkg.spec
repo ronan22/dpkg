@@ -2,8 +2,8 @@
 %global pkgdatadir      %{_datadir}/dpkg
 
 Name:           dpkg
-Version:        1.19.7
-Release:        9%{?dist}
+Version:        1.20.7.1
+Release:        1%{?dist}
 Summary:        Package maintenance system for Debian Linux
 # The entire source code is GPLv2+ with exception of the following
 # lib/dpkg/md5.c, lib/dpkg/md5.h - Public domain
@@ -14,12 +14,19 @@ Summary:        Package maintenance system for Debian Linux
 License:        GPLv2 and GPLv2+ and LGPLv2+ and Public Domain and BSD
 URL:            https://tracker.debian.org/pkg/dpkg
 Source0:        http://ftp.debian.org/debian/pool/main/d/dpkg/%{name}_%{version}.tar.xz
+# https://lists.debian.org/debian-dpkg/2017/08/msg00002.html
+# The problem is that your compiler gives a different triplet than the
+# one used by dpkg itself
+# Finally trying correct triplet for Fedora
+Patch1:         cputable_ppc64le.patch
+Patch2:         ostable_armv7hl.patch
+
 
 BuildRequires:  gcc-c++
 BuildRequires:  zlib-devel bzip2-devel libselinux-devel gettext ncurses-devel
 BuildRequires:  autoconf automake gettext-devel libtool
 BuildRequires:  doxygen flex xz-devel
-BuildRequires:  po4a >= 0.43
+BuildRequires:  po4a >= 0.59
 BuildRequires:  dotconf-devel
 # for /usr/bin/perl
 BuildRequires: perl-interpreter
@@ -82,6 +89,8 @@ Requires: bzip2
 Requires: lzma
 Requires: xz
 Requires: perl(MIME::Lite)
+# dpkg-architecture -qDEB_HOST_GNU_TYPE relies on cc -dumpmachine
+Requires:  gcc
 Obsoletes: dpkg-devel < 1.16
 BuildArch: noarch
 
@@ -157,7 +166,7 @@ Many users find dselect intimidating and new users may prefer to use apt-based
 user interfaces.
 
 %prep
-%setup -q
+%autosetup -p1
 
 # Filter unwanted Requires:
 cat << \EOF > %{name}-req
@@ -170,7 +179,7 @@ EOF
 chmod +x %{__perl_requires}
 
 %build
-export CXXFLAGS="-std=c++14 $RPM_OPT_FLAGS"
+#export CXXFLAGS="-std=c++14 $RPM_OPT_FLAGS"
 autoreconf
 %configure --disable-linker-optimisations \
         --with-admindir=%{_localstatedir}/lib/dpkg \
@@ -269,7 +278,7 @@ create_logfile
 
 %files -f dpkg.lang
 %doc debian/changelog README AUTHORS THANKS TODO
-%doc debian/usertags debian/dpkg.cron.daily
+%doc debian/README.bug-usertags debian/dpkg.cron.daily
 %license debian/copyright
 %dir %{pkgconfdir}
 %dir %{pkgconfdir}/dpkg.cfg.d
@@ -285,7 +294,9 @@ create_logfile
 %{_bindir}/dpkg-trigger
 %{_bindir}/dpkg-divert
 %{_bindir}/dpkg-statoverride
+%{_bindir}/dpkg-realpath
 %{_sbindir}/start-stop-daemon
+%{_sbindir}/dpkg-fsys-usrunmess
 %dir %{pkgdatadir}
 %{pkgdatadir}/abitable
 %{pkgdatadir}/cputable
@@ -306,8 +317,10 @@ create_logfile
 %{_mandir}/man1/dpkg-divert.1.gz
 %{_mandir}/man1/dpkg-statoverride.1.gz
 %{_mandir}/man8/start-stop-daemon.8.gz
-%{_mandir}/man5/deb-src-rules.5.gz
 %{_mandir}/man7/deb-version.7.gz
+%{_mandir}/man1/dpkg-realpath.1.gz
+%{_mandir}/man5/deb-conffiles.5.gz
+%{_mandir}/man8/dpkg-fsys-usrunmess.8.gz
 %{_mandir}/*/man1/dpkg.1.gz
 %{_mandir}/*/man1/dpkg-deb.1.gz
 %{_mandir}/*/man1/dpkg-maintscript-helper.1.gz
@@ -318,18 +331,22 @@ create_logfile
 %{_mandir}/*/man1/dpkg-divert.1.gz
 %{_mandir}/*/man1/dpkg-statoverride.1.gz
 %{_mandir}/*/man8/start-stop-daemon.8.gz
-%{_mandir}/*/man5/deb-src-rules.5.gz
 %{_mandir}/*/man7/deb-version.7.gz
+#{_mandir}/*/man1/dpkg-realpath.1.gz
+%{_mandir}/*/man5/deb-conffiles.5.gz
+%{_mandir}/*/man8/dpkg-fsys-usrunmess.8.gz
 %{_datadir}/polkit-1/actions/org.dpkg.pkexec.update-alternatives.policy
-
+%{_datadir}/doc/dpkg/*
+%{_datadir}/dpkg/sh/dpkg-error.sh
 
 %files devel
 %{_libdir}/libdpkg.a
 %{_libdir}/pkgconfig/libdpkg.pc
 %{_includedir}/dpkg/*.h
+%{_datadir}/aclocal/dpkg-*.m4
 
 %files dev -f dpkg-dev.lang
-%doc AUTHORS THANKS debian/usertags doc/README.api doc/frontend.txt doc/triggers.txt
+%doc AUTHORS THANKS debian/README.bug-usertags doc/README.api doc/frontend.txt doc/triggers.txt
 %config(noreplace) %{pkgconfdir}/shlibs.default
 %config(noreplace) %{pkgconfdir}/shlibs.override
 
@@ -351,6 +368,32 @@ create_logfile
 %{_bindir}/dpkg-source
 %{_bindir}/dpkg-vendor
 %{pkgdatadir}/*.mk
+#dpkg-dev.manpages
+%{_mandir}/man5/deb-buildinfo.5.gz
+%{_mandir}/man5/deb-changelog.5.gz
+%{_mandir}/man5/deb-changes.5.gz
+%{_mandir}/man5/deb-conffiles.5.gz
+%{_mandir}/man5/deb-control.5.gz
+%{_mandir}/man5/deb-extra-override.5.gz
+%{_mandir}/man5/deb-old.5.gz
+%{_mandir}/man5/deb-origin.5.gz
+%{_mandir}/man5/deb-override.5.gz
+%{_mandir}/man5/deb-postinst.5.gz
+%{_mandir}/man5/deb-postrm.5.gz
+%{_mandir}/man5/deb-preinst.5.gz
+%{_mandir}/man5/deb-prerm.5.gz
+%{_mandir}/man5/deb-shlibs.5.gz
+%{_mandir}/man5/deb-split.5.gz
+%{_mandir}/man5/deb-src-control.5.gz
+%{_mandir}/man5/deb-src-files.5.gz
+%{_mandir}/man5/deb-src-rules.5.gz
+%{_mandir}/man5/deb-src-symbols.5.gz
+%{_mandir}/man5/deb-substvars.5.gz
+%{_mandir}/man5/deb-symbols.5.gz
+%{_mandir}/man5/deb-triggers.5.gz
+%{_mandir}/man7/deb-version.7.gz
+%{_mandir}/man5/deb.5.gz
+%{_mandir}/man5/deb822.5.gz
 %{_mandir}/man1/dpkg-architecture.1.gz
 %{_mandir}/man1/dpkg-buildflags.1.gz
 %{_mandir}/man1/dpkg-buildpackage.1.gz
@@ -368,33 +411,35 @@ create_logfile
 %{_mandir}/man1/dpkg-shlibdeps.1.gz
 %{_mandir}/man1/dpkg-source.1.gz
 %{_mandir}/man1/dpkg-vendor.1.gz
-%{_mandir}/man5/deb-buildinfo.5.gz
-%{_mandir}/man5/deb-changelog.5.gz
-%{_mandir}/man5/deb-changes.5.gz
-%{_mandir}/man5/deb-control.5.gz
-%{_mandir}/man5/deb-conffiles.5.gz
-%{_mandir}/man5/deb-src-files.5.gz
-%{_mandir}/man5/deb-extra-override.5.gz
-%{_mandir}/man5/deb-old.5.gz
-%{_mandir}/man5/deb-origin.5.gz
-%{_mandir}/man5/deb-override.5.gz
-%{_mandir}/man5/deb-shlibs.5.gz
-%{_mandir}/man5/deb-split.5.gz
-%{_mandir}/man5/deb-src-control.5.gz
-%{_mandir}/man5/deb-substvars.5.gz
-%{_mandir}/man5/deb-symbols.5.gz
-%{_mandir}/man5/deb-postinst.5.gz
-%{_mandir}/man5/deb-postrm.5.gz
-%{_mandir}/man5/deb-preinst.5.gz
-%{_mandir}/man5/deb-prerm.5.gz
-%{_mandir}/man5/deb-triggers.5.gz
-#{_mandir}/man5/deb-version.5.gz
-%{_mandir}/man5/deb.5.gz
-%{_mandir}/man5/deb822.5.gz
 %{_mandir}/man5/dsc.5.gz
+%{_mandir}/*/man5/deb-buildinfo.5.gz
+%{_mandir}/*/man5/deb-changelog.5.gz
+%{_mandir}/*/man5/deb-changes.5.gz
+%{_mandir}/*/man5/deb-conffiles.5.gz
+%{_mandir}/*/man5/deb-control.5.gz
+%{_mandir}/*/man5/deb-extra-override.5.gz
+%{_mandir}/*/man5/deb-old.5.gz
+%{_mandir}/*/man5/deb-origin.5.gz
+%{_mandir}/*/man5/deb-override.5.gz
+%{_mandir}/*/man5/deb-postinst.5.gz
+%{_mandir}/*/man5/deb-postrm.5.gz
+%{_mandir}/*/man5/deb-preinst.5.gz
+%{_mandir}/*/man5/deb-prerm.5.gz
+%{_mandir}/*/man5/deb-shlibs.5.gz
+%{_mandir}/*/man5/deb-split.5.gz
+%{_mandir}/*/man5/deb-src-control.5.gz
+%{_mandir}/*/man5/deb-src-files.5.gz
+%{_mandir}/*/man5/deb-src-rules.5.gz
+%{_mandir}/*/man5/deb-src-symbols.5.gz
+%{_mandir}/*/man5/deb-substvars.5.gz
+%{_mandir}/*/man5/deb-symbols.5.gz
+%{_mandir}/*/man5/deb-triggers.5.gz
+%{_mandir}/*/man7/deb-version.7.gz
+%{_mandir}/*/man5/deb.5.gz
+%{_mandir}/*/man5/deb822.5.gz
 %{_mandir}/*/man1/dpkg-architecture.1.gz
-%{_mandir}/*/man1/dpkg-buildpackage.1.gz
 %{_mandir}/*/man1/dpkg-buildflags.1.gz
+%{_mandir}/*/man1/dpkg-buildpackage.1.gz
 %{_mandir}/*/man1/dpkg-checkbuilddeps.1.gz
 %{_mandir}/*/man1/dpkg-distaddfile.1.gz
 %{_mandir}/*/man1/dpkg-genbuildinfo.1.gz
@@ -409,31 +454,7 @@ create_logfile
 %{_mandir}/*/man1/dpkg-shlibdeps.1.gz
 %{_mandir}/*/man1/dpkg-source.1.gz
 %{_mandir}/*/man1/dpkg-vendor.1.gz
-%{_mandir}/*/man5/deb-buildinfo.5.gz
-%{_mandir}/*/man5/deb-changelog.5.gz
-%{_mandir}/*/man5/deb-changes.5.gz
-%{_mandir}/*/man5/deb-control.5.gz
-%{_mandir}/*/man5/deb-conffiles.5.gz
-%{_mandir}/*/man5/deb-src-files.5.gz
-%{_mandir}/*/man5/deb-extra-override.5.gz
-%{_mandir}/*/man5/deb-old.5.gz
-%{_mandir}/*/man5/deb-origin.5.gz
-%{_mandir}/*/man5/deb-override.5.gz
-%{_mandir}/*/man5/deb-shlibs.5.gz
-%{_mandir}/*/man5/deb-split.5.gz
-%{_mandir}/*/man5/deb-src-control.5.gz
-%{_mandir}/*/man5/deb-substvars.5.gz
-%{_mandir}/*/man5/deb-symbols.5.gz
-%{_mandir}/*/man5/deb-postinst.5.gz
-%{_mandir}/*/man5/deb-postrm.5.gz
-%{_mandir}/*/man5/deb-preinst.5.gz
-%{_mandir}/*/man5/deb-prerm.5.gz
-%{_mandir}/*/man5/deb-triggers.5.gz
-#{_mandir}/*/man5/deb-version.5.gz
-%{_mandir}/*/man5/deb.5.gz
-%{_mandir}/*/man5/deb822.5.gz
 %{_mandir}/*/man5/dsc.5.gz
-
 
 %files perl
 %{perl_vendorlib}/Dpkg*
@@ -456,10 +477,13 @@ create_logfile
 
 
 %changelog
+* Mon Feb 15 2021 Sérgio Basto <sergio@serjux.com> - 1.20.7.1-1
+- Update to 1.20.7.1 (#1811388)
+
 * Tue Jan 26 2021 Fedora Release Engineering <releng@fedoraproject.org> - 1.19.7-9
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
 
-* Tue Aug 14 2020 Jeff Law <law@redhat.com> - 1.19.7-8
+* Tue Aug 18 2020 Jeff Law <law@redhat.com> - 1.19.7-8
 - Force C++14 as this code is not C++17 ready
 
 * Mon Jul 27 2020 Fedora Release Engineering <releng@fedoraproject.org> - 1.19.7-7
