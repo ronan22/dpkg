@@ -179,7 +179,6 @@ EOF
 chmod +x %{__perl_requires}
 
 %build
-#export CXXFLAGS="-std=c++14 $RPM_OPT_FLAGS"
 autoreconf
 %configure --disable-linker-optimisations \
         --with-admindir=%{_localstatedir}/lib/dpkg \
@@ -479,6 +478,7 @@ create_logfile
 %changelog
 * Mon Feb 15 2021 Sérgio Basto <sergio@serjux.com> - 1.20.7.1-1
 - Update to 1.20.7.1 (#1811388)
+- Remove force C++14 as 1.20.7.1 seems ready for C++17
 
 * Tue Jan 26 2021 Fedora Release Engineering <releng@fedoraproject.org> - 1.19.7-9
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
