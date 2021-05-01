@@ -3,7 +3,7 @@
 
 Name:           dpkg
 Version:        1.20.7.1
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Package maintenance system for Debian Linux
 # The entire source code is GPLv2+ with exception of the following
 # lib/dpkg/md5.c, lib/dpkg/md5.h - Public domain
@@ -218,6 +218,29 @@ install -pm0644 debian/shlibs.override %{buildroot}/%{pkgconfdir}
 mkdir -p %{buildroot}/%{_sysconfdir}/logrotate.d
 install -pm0644 debian/dpkg.logrotate %{buildroot}/%{_sysconfdir}/logrotate.d/%{name}
 
+# from dpkg.postinst
+# Create the database files if they don't already exist
+create_database() {
+    admindir=${DPKG_ADMINDIR:-%{buildroot}/var/lib/dpkg}
+
+    for file in diversions statoverride status; do
+    if [ ! -f "$admindir/$file" ]; then
+        touch "$admindir/$file"
+    fi
+    done
+}
+
+# Create log file and set default permissions if possible
+create_logfile() {
+    logfile=%{buildroot}/var/log/dpkg.log
+    mkdir -p %{buildroot}/var/log/
+    touch $logfile
+    chmod 644 $logfile
+    #chown root:root $logfile 2>/dev/null || chown 0:0 $logfile
+}
+create_database
+create_logfile
+
 %find_lang dpkg
 %find_lang dpkg-dev
 %find_lang dselect
@@ -249,30 +272,6 @@ rm -rf %{buildroot}%{_mandir}/pl/man1/
 %check
 make VERBOSE=1 TESTSUITEFLAGS=--verbose \
     TEST_PARALLEL=4 check || :
-
-
-%post
-# from dpkg.postinst
-# Create the database files if they don't already exist
-create_database() {
-    admindir=${DPKG_ADMINDIR:-/var/lib/dpkg}
-
-    for file in diversions statoverride status; do
-    if [ ! -f "$admindir/$file" ]; then
-        touch "$admindir/$file"
-    fi
-    done
-}
-
-# Create log file and set default permissions if possible
-create_logfile() {
-    logfile=/var/log/dpkg.log
-    touch $logfile
-    chmod 644 $logfile
-    chown root:root $logfile 2>/dev/null || chown 0:0 $logfile
-}
-create_database
-create_logfile
 
 
 %files -f dpkg.lang
@@ -337,6 +336,8 @@ create_logfile
 %{_datadir}/polkit-1/actions/org.dpkg.pkexec.update-alternatives.policy
 %{_datadir}/doc/dpkg/*
 %{_datadir}/dpkg/sh/dpkg-error.sh
+%{_localstatedir}/log/%{name}.log
+%{_localstatedir}/lib/%{name}
 
 %files devel
 %{_libdir}/libdpkg.a
@@ -476,6 +477,9 @@ create_logfile
 
 
 %changelog
+* Sat May 01 2021 Sérgio Basto <sergio@serjux.com> - 1.20.7.1-2
+- Fix for fedora-silverblue
+
 * Mon Feb 15 2021 Sérgio Basto <sergio@serjux.com> - 1.20.7.1-1
 - Update to 1.20.7.1 (#1811388)
 - Remove force C++14 as 1.20.7.1 seems ready for C++17
