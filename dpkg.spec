@@ -519,6 +519,12 @@ make VERBOSE=1 TESTSUITEFLAGS=--verbose \
 - Remove hack for crapy /usr/lib/rpm/perl.req in EL7 (#1510214)
 - Disable our custom dpkg-req
 
+* Sat Oct 05 2019 Sérgio Basto <sergio@serjux.com> - 1.18.25-12
+- BR: perl(Digest::MD5) need by make check
+
+* Sat Oct 05 2019 Sérgio Basto <sergio@serjux.com> - 1.18.25-11
+- Fix #1758136 related with #1628409 (dpkg-perl only needs MD5, SHA1 and SHA256)
+
 * Wed Jul 24 2019 Fedora Release Engineering <releng@fedoraproject.org> - 1.18.25-10
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_31_Mass_Rebuild
 
