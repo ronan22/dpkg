@@ -2,8 +2,8 @@
 %global pkgdatadir      %{_datadir}/dpkg
 
 Name:           dpkg
-Version:        1.20.7.1
-Release:        2%{?dist}
+Version:        1.20.9
+Release:        1%{?dist}
 Summary:        Package maintenance system for Debian Linux
 # The entire source code is GPLv2+ with exception of the following
 # lib/dpkg/md5.c, lib/dpkg/md5.h - Public domain
@@ -23,9 +23,10 @@ Patch2:         ostable_armv7hl.patch
 
 
 BuildRequires:  gcc-c++
+BuildRequires:  make
 BuildRequires:  zlib-devel bzip2-devel libselinux-devel gettext ncurses-devel
 BuildRequires:  autoconf automake gettext-devel libtool
-BuildRequires:  doxygen flex xz-devel
+BuildRequires:  doxygen xz-devel
 BuildRequires:  po4a >= 0.59
 BuildRequires:  dotconf-devel
 # for /usr/bin/perl
@@ -44,8 +45,9 @@ BuildRequires: perl(IPC::Cmd)
 BuildRequires: perl(Digest::MD5)
 BuildRequires: perl(Digest::SHA)
 BuildRequires: perl(IO::String)
+BuildRequires: perl(Tie::Handle)
+# ./t/dpkg_buildpackage.t ........ skipped: requires command fakeroot
 BuildRequires: fakeroot
-BuildRequires: make
 
 Requires(post): coreutils
 
@@ -88,6 +90,7 @@ Requires: binutils
 Requires: bzip2
 Requires: lzma
 Requires: xz
+#https://bugzilla.redhat.com/show_bug.cgi?id=1678637
 Requires: perl(MIME::Lite)
 # dpkg-architecture -qDEB_HOST_GNU_TYPE relies on cc -dumpmachine
 Requires:  gcc
@@ -172,10 +175,10 @@ user interfaces.
 cat << \EOF > %{name}-req
 #!/bin/sh
 %{__perl_requires} $* |\
-  sed -e '/perl(Dselect::Ftp)/d' -e '/perl(extra)/d' -e '/perl(file)/d' -e '/perl(dpkg-gettext.pl)/d' -e '/perl(controllib.pl)/d' -e '/perl(in)/d'
+  sed -e '/perl(Dselect::Ftp)/d' -e '/perl(extra)/d' -e '/perl(file)/d' -e '/perl(in)/d'
 EOF
 
-%define __perl_requires %{_builddir}/%{name}-%{version}/%{name}-req
+%define __perl_requires %{_builddir}/dpkg-%{version}/dpkg-req
 chmod +x %{__perl_requires}
 
 %build
@@ -190,6 +193,8 @@ autoreconf
 
 # todo add this
 #--with-devlibdir=\$${prefix}/lib/$(DEB_HOST_MULTIARCH) \
+#If Fedora is not using multiarch then this probably would not make
+#sense there.
 %make_build
 
 
@@ -214,7 +219,7 @@ install -pm0644 debian/dselect.cfg %{buildroot}/%{pkgconfdir}
 install -pm0644 debian/shlibs.default %{buildroot}/%{pkgconfdir}
 install -pm0644 debian/shlibs.override %{buildroot}/%{pkgconfdir}
 
-# patched debian/dpkg.logrotate
+# debian/dpkg.logrotate
 mkdir -p %{buildroot}/%{_sysconfdir}/logrotate.d
 install -pm0644 debian/dpkg.logrotate %{buildroot}/%{_sysconfdir}/logrotate.d/%{name}
 
@@ -253,10 +258,6 @@ rm %{buildroot}%{_mandir}/man1/update-alternatives.1
 rm -r %{buildroot}%{_mandir}/*/man1/update-alternatives.1
 rm -r %{buildroot}%{_sysconfdir}/alternatives/
 
-#fedora has own implemenation
-#FIXME should we remove this ?
-rm -rf %{buildroot}%{_sbindir}/install-info
-
 #mkdir -p %{buildroot}%{_localstatedir}/lib/dpkg/alternatives %{buildroot}%{_localstatedir}/lib/dpkg/info \
 # %{buildroot}%{_localstatedir}/lib/dpkg/parts %{buildroot}%{_localstatedir}/lib/dpkg/updates \
 # %{buildroot}%{_localstatedir}/lib/dpkg/methods
@@ -272,7 +273,8 @@ rm -rf %{buildroot}%{_mandir}/pl/man1/
 %check
 make VERBOSE=1 TESTSUITEFLAGS=--verbose \
     TEST_PARALLEL=4 check || :
-
+# I've queued patches so that the test suite should be able to pass
+# in 1.21.x w/ no dpkg installed.
 
 %files -f dpkg.lang
 %doc debian/changelog README AUTHORS THANKS TODO
@@ -300,11 +302,6 @@ make VERBOSE=1 TESTSUITEFLAGS=--verbose \
 %{pkgdatadir}/cputable
 %{pkgdatadir}/ostable
 %{pkgdatadir}/tupletable
-%dir %{_localstatedir}/lib/dpkg
-%dir %{_localstatedir}/lib/dpkg/alternatives
-%dir %{_localstatedir}/lib/dpkg/info
-%dir %{_localstatedir}/lib/dpkg/parts
-%dir %{_localstatedir}/lib/dpkg/updates
 %{_mandir}/man1/dpkg.1.gz
 %{_mandir}/man1/dpkg-deb.1.gz
 %{_mandir}/man1/dpkg-maintscript-helper.1.gz
@@ -315,9 +312,7 @@ make VERBOSE=1 TESTSUITEFLAGS=--verbose \
 %{_mandir}/man1/dpkg-divert.1.gz
 %{_mandir}/man1/dpkg-statoverride.1.gz
 %{_mandir}/man8/start-stop-daemon.8.gz
-%{_mandir}/man7/deb-version.7.gz
 %{_mandir}/man1/dpkg-realpath.1.gz
-%{_mandir}/man5/deb-conffiles.5.gz
 %{_mandir}/man8/dpkg-fsys-usrunmess.8.gz
 %{_mandir}/*/man1/dpkg.1.gz
 %{_mandir}/*/man1/dpkg-deb.1.gz
@@ -329,15 +324,13 @@ make VERBOSE=1 TESTSUITEFLAGS=--verbose \
 %{_mandir}/*/man1/dpkg-divert.1.gz
 %{_mandir}/*/man1/dpkg-statoverride.1.gz
 %{_mandir}/*/man8/start-stop-daemon.8.gz
-%{_mandir}/*/man7/deb-version.7.gz
-#{_mandir}/*/man1/dpkg-realpath.1.gz
-%{_mandir}/*/man5/deb-conffiles.5.gz
+%{_mandir}/*/man1/dpkg-realpath.1.gz
 %{_mandir}/*/man8/dpkg-fsys-usrunmess.8.gz
 %{_datadir}/polkit-1/actions/org.dpkg.pkexec.update-alternatives.policy
 %{_datadir}/doc/dpkg/*
 %{_datadir}/dpkg/sh/dpkg-error.sh
 %{_localstatedir}/log/%{name}.log
-%{_localstatedir}/lib/%{name}
+%{_localstatedir}/lib/dpkg
 
 %files devel
 %{_libdir}/libdpkg.a
@@ -477,6 +470,13 @@ make VERBOSE=1 TESTSUITEFLAGS=--verbose \
 
 
 %changelog
+* Mon May 10 2021 Sérgio Basto <sergio@serjux.com> - 1.20.9-1
+- Update to 1.20.9 (#1949336)
+- flex is not required anymore, doxygen is only needed if you call make doc
+- The dpkg-gettext.pl and controllib.pl are long obsolete, can be removed.
+- dpkg has not shipped install-info for a long while now.
+- and others reviews
+
 * Sat May 01 2021 Sérgio Basto <sergio@serjux.com> - 1.20.7.1-2
 - Fix for fedora-silverblue
 
