@@ -20,6 +20,7 @@ Source0:        http://ftp.debian.org/debian/pool/main/d/dpkg/%{name}_%{version}
 # Finally trying to correct triplet for Fedora
 Patch1:         cputable_ppc64le.patch
 Patch2:         ostable_armv7hl.patch
+Patch3:         ubuntu-zstd-support.patch
 
 
 BuildRequires:  gcc-c++
@@ -167,6 +168,7 @@ user interfaces.
 
 %prep
 %autosetup -p1
+%patch3 -p1
 
 # Filter unwanted Requires:
 cat << \EOF > %{name}-req
